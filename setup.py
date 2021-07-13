@@ -12,7 +12,7 @@ setup(name = "binaryaudit",
         install_requires = [
         ],
         scripts = [
-            "bin/ba_example",
+            "bin/ba_is_elf",
         ],
         zip_safe = False)
 
