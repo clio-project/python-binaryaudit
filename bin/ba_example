@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+
+from binaryaudit import abicheck
+
+print("hello")
+
