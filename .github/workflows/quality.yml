@@ -1,0 +1,13 @@
+name: QA on binaryaudit Python module
+on: [pull request, create]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+  steps:
+    - name: Run flake8 on binaryaudit/*.py
+      run: python3 -m flake8 ./binaryaudit/*.py
+    - name: Run flake8 on setup.py
+      run: python3 -m flake8 setup.py
+    - name: Run flake8 on bin/*
+      run: python3 -m flake8 bin/*
