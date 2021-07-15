@@ -5,7 +5,7 @@ from binaryaudit import abicheck
 
 class AbicheckTestSuite(unittest.TestCase):
     def test_is_elf(self):
-        assert abicheck.is_elf("/usr/bin/ls")
+        assert abicheck.is_elf("/bin/ls")
 
     def test_get_bits(self):
         code = 8 | 4
