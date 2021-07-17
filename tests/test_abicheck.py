@@ -5,6 +5,7 @@ from binaryaudit import abicheck
 
 data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 
+
 class AbicheckTestSuite(unittest.TestCase):
     def test_is_elf(self):
         assert abicheck.is_elf("/bin/ls")
