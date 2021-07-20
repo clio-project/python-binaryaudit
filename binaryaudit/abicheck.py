@@ -1,5 +1,8 @@
 
+import json
+import os
 import subprocess
+from binaryaudit import run
 from xml.etree import ElementTree
 
 def is_elf(fn):
@@ -80,3 +83,24 @@ def diff_get_bits(c):
         a.append("INCOMPATIBLE_CHANGE")
 
     return a
+
+def generate_package_json(source_dir, out_filename):
+    ''' Gets input directory of RPMs, groups packages based on source RPM, and outputs to JSON file.
+
+        Parameters:
+            source_dir (str): The path to the input directory.
+            out_filename (str): The name of the output JSON file
+    '''
+    rpm_dict = {}
+    for filename in os.listdir(source_dir):
+        f = os.path.join(source_dir, filename)
+        if os.path.isfile(f):
+            if f.endswith(".rpm"):
+                proc, proc_exit_code = run.run_command(["rpm", "-qpi", f], None, subprocess.PIPE)
+                grep, grep_exit_code = run.run_command(["grep", "Source RPM"], proc.stdout, subprocess.PIPE)
+                source = grep.stdout.read()
+                source = source.replace(b"Source RPM  : ", b"")
+                source = source.replace(b"\n", b"")
+                rpm_dict.setdefault(source.decode('utf-8'), []).append(filename)
+    with open(out_filename, "w") as outputFile:
+        json.dump(rpm_dict, outputFile, indent=2)
