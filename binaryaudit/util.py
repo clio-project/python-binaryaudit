@@ -8,4 +8,3 @@ def _warn(*args):
 
 def _error(*args):
     print("ERROR: " + ''.join(args))
-

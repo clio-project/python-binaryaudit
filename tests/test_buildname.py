@@ -9,7 +9,7 @@ class BuildnameTestSuite(unittest.TestCase):
         adir = "/hello/buildhistory/packages/cortexa57-poky-linux/somepkg/binaryaudit/abixml"
         expected = "/hello/buildhistory/packages/cortexa57-poky-linux/somepkg/binaryaudit/abixml/myexe.xml"
         result = bn.build_name(sn, adir, fn)
-    
+
         assert expected == result
 
     def test_sn_1(self):
@@ -18,7 +18,7 @@ class BuildnameTestSuite(unittest.TestCase):
         adir = "/path/buildhistory/packages/cortexa57-poky-linux/openssl/binaryaudit/abixml"
         expected = "/path/buildhistory/packages/cortexa57-poky-linux/openssl/binaryaudit/abixml/libcrypto.so.xml"
         result = bn.build_name(sn, adir, fn)
-    
+
         assert expected == result
 
     def test_sn_2(self):
@@ -27,16 +27,5 @@ class BuildnameTestSuite(unittest.TestCase):
         adir = "/there/buildhistory/packages/cortexa57-poky-linux/curl/binaryaudit/abixml"
         expected = "/there/buildhistory/packages/cortexa57-poky-linux/curl/binaryaudit/abixml/libcurl.so.xml"
         result = bn.build_name(sn, adir, fn)
-    
+
         assert expected == result
-
-    
-    # def test_exception(self):
-    #     fn = "doesn't matter"
-    #     sn =""
-    #     adir = "/there/buildhistory/packages/cortexa57-poky-linux/curl/binaryaudit/abixml"
-    #     expected = "WARNING: couldn't parse soname "
-
-    #     result = bn.build_name(sn, adir, fn)
-    
-    #     assert expected == result
