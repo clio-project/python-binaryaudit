@@ -1,10 +1,11 @@
-def note(*args):
+def _note(*args):
     print(''.join(args))
 
 
-def warn(*args):
+def _warn(*args):
     print("WARNING: " + ''.join(args))
 
 
-def error(*args):
+def _error(*args):
     print("ERROR: " + ''.join(args))
+
