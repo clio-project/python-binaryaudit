@@ -38,12 +38,12 @@ def build_all_xml(adir, id):
             util.note(" ".join(cmd))
             if not 0 == ret:
                 util.error(out)
-                return                
+                return
             if not out:
                 util.warn("Empty dump output for '{}'".format(fn))
                 return
 
             sn = abicheck.get_soname_from_xml(out)
-            
+
             bn = build_name(sn, adir, fn)
             return bn
