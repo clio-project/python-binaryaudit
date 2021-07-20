@@ -3,9 +3,9 @@ import os
 from binaryaudit import abicheck
 try:
     import bb as util
-    util.note = bb.note
-    util.warn = bb.warn
-    util.error = bb.error
+    util.note = bb.note # noqa: F821
+    util.warn = bb.warn # noqa: F821
+    util.error = bb.error # noqa: F821
 except:
     from binaryaudit import util
     util.note = util._note
