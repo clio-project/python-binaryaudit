@@ -1,6 +1,9 @@
 
 import subprocess
 from xml.etree import ElementTree
+import glob
+import os
+from binaryaudit import util
 
 
 def is_elf(fn):
@@ -48,6 +51,33 @@ def compare(ref, cur):
         raise
     # return cmd for logging purposes
     return process.returncode, out, cmd
+
+
+def serialize_artifacts(adir, id):
+    ''' Recursively serialize binary artifacts starting at the given image directory(id), yields serialized output and filename
+    Parameters:
+        adir (str): path to abixml directory
+        id (str): image directory- result of calling d.getVar("IMG_DIR")
+    '''
+    for fn in glob.iglob(id + "/**/**", recursive=True):
+        if os.path.isfile(fn) and not os.path.islink(fn):
+            if not is_elf(fn):
+                continue
+            # If there's no error, out is the XML representation
+            ret, out, cmd = serialize(fn)
+            util.note(" ".join(cmd))
+            if not 0 == ret:
+                util.error(out)
+                return
+            if not out:
+                util.warn("Empty dump output for '{}'".format(fn))
+                return
+
+            sn = get_soname_from_xml(out)
+
+            out_fn = util.create_path_to_xml(sn, adir, fn)
+
+            yield out, out_fn
 
 
 DIFF_OK = 0

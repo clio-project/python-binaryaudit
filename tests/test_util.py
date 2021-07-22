@@ -1,14 +1,14 @@
 import unittest
-from binaryaudit import buildname as bn
+from binaryaudit import util
 
 
-class BuildnameTestSuite(unittest.TestCase):
+class UtilTestSuite(unittest.TestCase):
     def test_no_sn(self):
         sn = ""
         fn = "/some/path/to/myexe"
         adir = "/hello/buildhistory/packages/cortexa57-poky-linux/somepkg/binaryaudit/abixml"
         expected = "/hello/buildhistory/packages/cortexa57-poky-linux/somepkg/binaryaudit/abixml/myexe.xml"
-        result = bn.build_name(sn, adir, fn)
+        result = util.create_path_to_xml(sn, adir, fn)
 
         assert expected == result
 
@@ -17,7 +17,7 @@ class BuildnameTestSuite(unittest.TestCase):
         fn = ""
         adir = "/path/buildhistory/packages/cortexa57-poky-linux/openssl/binaryaudit/abixml"
         expected = "/path/buildhistory/packages/cortexa57-poky-linux/openssl/binaryaudit/abixml/libcrypto.so.xml"
-        result = bn.build_name(sn, adir, fn)
+        result = util.create_path_to_xml(sn, adir, fn)
 
         assert expected == result
 
@@ -26,6 +26,6 @@ class BuildnameTestSuite(unittest.TestCase):
         sn = "libcurl.so.4"
         adir = "/there/buildhistory/packages/cortexa57-poky-linux/curl/binaryaudit/abixml"
         expected = "/there/buildhistory/packages/cortexa57-poky-linux/curl/binaryaudit/abixml/libcurl.so.xml"
-        result = bn.build_name(sn, adir, fn)
+        result = util.create_path_to_xml(sn, adir, fn)
 
         assert expected == result
