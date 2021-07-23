@@ -1,14 +1,12 @@
 #!/usr/bin/python3
 
-import datetime
-
-import sqlalchemy as db
 from sqlalchemy.engine.url import URL
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import sessionmaker
 
 from envparse import env
+
 
 class abichecker_db_wrapper:
     '''
@@ -34,7 +32,7 @@ class abichecker_db_wrapper:
         '''
         '''
         session.close()
- 
+
     def _initialize_db_connection(self) -> None:
         '''
         '''
@@ -112,7 +110,7 @@ class abichecker_db_wrapper:
                             DistroName=distroname,
                             DerivativeName=derivativename
                     ).one_or_none())
- 
+
         self._release_session(session)
         product_id = record.ProductID
 
