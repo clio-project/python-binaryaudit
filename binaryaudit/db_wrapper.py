@@ -77,7 +77,7 @@ class abichecker_db_wrapper:
         '''
         self._initialize_db_connection()
 
-    def is_abichecker_db_connected() -> bool:
+    def is_abichecker_db_connected(self) -> bool:
         '''
         '''
         if self._session:
