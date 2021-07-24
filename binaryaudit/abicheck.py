@@ -5,7 +5,6 @@ import subprocess
 from binaryaudit import run
 from xml.etree import ElementTree
 import glob
-import os
 from binaryaudit import util
 
 
@@ -124,6 +123,7 @@ def diff_get_bits(c):
         a.append("INCOMPATIBLE_CHANGE")
 
     return a
+
 
 def generate_package_json(source_dir, out_filename):
     ''' Gets input directory of RPMs, groups packages based on source RPM, and outputs to JSON file.

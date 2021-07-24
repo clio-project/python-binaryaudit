@@ -1,5 +1,6 @@
 import subprocess
 
+
 def run_command(cmd, input, output):
     ''' Runs commands and gets output.
 

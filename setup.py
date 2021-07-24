@@ -10,7 +10,7 @@ setup(name="binaryaudit",
       license="MIT",
       packages=["binaryaudit"],
       install_requires=[
-        "sqlalchemy", # XXX Possibly the db wrapper is to be standalone
+        "sqlalchemy",  # XXX Possibly the db wrapper is to be standalone
         "envparse",
         "python-dateutil",
       ],
