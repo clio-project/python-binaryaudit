@@ -16,6 +16,7 @@ setup(name="binaryaudit",
       ],
       scripts=[
         "bin/ba_is_elf",
-        "bin/abi_checker_module"
+        "bin/abi_checker_module",
+        "bin/ba_abidiff",
       ],
       zip_safe=False)
