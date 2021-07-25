@@ -24,7 +24,7 @@ if None is args.cmd:
         util.note("'{}' is not an ELF binary".format(args.is_elf))
         sys.exit(3)
 elif "rpm" == args.cmd:
-    if "group" == args.rpm_cmd:
+    if "list" == args.rpm_cmd:
         if None is args.source_dir or None is args.out_filename:
             util.error("Pass package directory and JSON output file")
             sys.exit(1)

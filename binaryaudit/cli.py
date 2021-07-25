@@ -24,11 +24,11 @@ arg_parser_rpm = arg_parser_subs.add_parser("rpm", help="RPM tools")
 
 arg_parser_rpm_subs = arg_parser_rpm.add_subparsers(help="Subcommands", dest="rpm_cmd")
 
-arg_parser_rpm_group = arg_parser_rpm_subs.add_parser(
-        "group",
+arg_parser_rpm_list = arg_parser_rpm_subs.add_parser(
+        "list",
         help="Read RPM packages in a directory and create a list grouped by SRPM.")
-arg_parser_rpm_group.add_argument('--source-dir', action="store", help="RPM package directory")
-arg_parser_rpm_group.add_argument('--out-filename', action="store", help="Output filename")
+arg_parser_rpm_list.add_argument('--source-dir', action="store", help="RPM package directory")
+arg_parser_rpm_list.add_argument('--out-filename', action="store", help="Output filename")
 
 
 # binaryaudit db ..
