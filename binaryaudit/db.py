@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker
 from envparse import env
 
 
-class abichecker_db_wrapper:
+class wrapper:
     '''
     '''
     def __init__(self, dbconfig, logger) -> None:
@@ -49,7 +49,7 @@ class abichecker_db_wrapper:
                 pool_recycle=self._connection_timeout
         )
 
-        self.logger.print_debug_logs("Initializing database connection")
+        self.logger.info("Initializing database connection")
         metadata = MetaData()
         metadata.reflect(
                 db_engine,
@@ -70,19 +70,19 @@ class abichecker_db_wrapper:
 
         self._session = sessionmaker(bind=db_engine, expire_on_commit=False)
 
-    def abichecker_initialize_db(self) -> None:
+    def initialize_db(self) -> None:
         '''
         '''
         self._initialize_db_connection()
 
-    def is_abichecker_db_connected(self) -> bool:
+    def is_db_connected(self) -> bool:
         '''
         '''
         if self._session:
             return True
         return False
 
-    def abichecker_get_product_id(self, distroname, derivativename) -> int:
+    def get_product_id(self, distroname, derivativename) -> int:
         '''
         '''
         product_id = 0
@@ -115,3 +115,36 @@ class abichecker_db_wrapper:
         product_id = record.ProductID
 
         return product_id
+
+
+class orchestrator:
+    '''
+    ABI checker orchestrator class for the trigger the abi checker functionality.
+    '''
+
+    def __init__(self, distroname, derivative, build_id, telemetery, logger):
+        '''
+        '''
+        self.logger = logger
+        self.distroname = distroname
+        self.derivative = derivative
+        self.build_id = build_id
+        self.product_id = 0
+        self.enable_telemetry = telemetery
+
+        # Instantiate the db connection to upload results to DB
+        if self.enable_telemetry == 'y':
+            self.db_conn = wrapper("db_config", self.logger)
+            self.db_conn.initialize_db()
+
+    def initalize_product_id(self) -> None:
+        '''
+        '''
+        if self.db_conn.is_db_connected:
+            product_id = self.db_conn.get_product_id(
+                    abicheckermodule.distroname,
+                    abicheckermodule.derivative
+            )
+            self.logger.info("Product_id: %s" % product_id)
+        else:
+            self.logger.debug("Not connected")

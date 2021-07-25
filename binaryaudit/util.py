@@ -1,16 +1,93 @@
 import os
+import sys
+import logging
+
+this = sys.modules[__name__]
+this.logger = None
+this.note = None
+this.warn = None
+this.error = None
+this.fatal = None
+this.debug = None
+
+class logger_wrapper:
+    def __init__(self, name="binaryaudit"):
+        self.logger = logging.getLogger(name)
+        self.logger.setLevel(logging.WARN)
+
+    def note(self, *args):
+        self.logger.info("".join(args))
+
+    def warn(self, *args):
+        self.logger.warning("".join(args))
+
+    def error(self, *args):
+        self.logger.error("".join(args))
+
+    def fatal(self, *args):
+        self.logger.critical("".join(args))
+
+    def debug(self, *args):
+        import inspect
+        frameinfo = inspect.getouterframes(inspect.currentframe())
+        (frame, source, lineno, func, lines, index) = frameinfo[1]
+        caller_log = "%s:%s::" % (func, lineno)
+        self.logger.debug(caller_log + "".join(args))
+
+    def setLevel(self, level):
+        self.logger.setLevel(level)
 
 
 def _note(*args):
-    print(''.join(args))
+    this.logger.note("".join(args))
 
 
 def _warn(*args):
-    print("WARNING: " + ''.join(args))
+    this.logger.warning("".join(args))
 
 
 def _error(*args):
-    print("ERROR: " + ''.join(args))
+    this.logger.error("".join(args))
+
+
+def _fatal(*args):
+    this.logger.critical("".join(args))
+
+
+def _debug(*args):
+    this.logger.debug("".join(args))
+
+
+def create_logger(name="binaryaudit"):
+    if None is this.logger:
+        logger = logger_wrapper(name)
+    return logger
+
+
+def setup_log(name="binaryaudit"):
+    if None is this.logger:
+        logging.basicConfig()
+        this.logger = create_logger(name)
+        this.debug = _debug
+        this.note = _note
+        this.warn = _warn
+        this.error = _error
+        this.fatal = _fatal
+
+
+# TODO perhaps set the exact level instead of just up level to DEBUG
+def set_verbosity(v):
+    level = logging.WARN
+    if v:
+        # NOTE this throws together both INFO and DEBUG level which seems
+        #      fine fornow. To consider might be using -v repetitions to set
+        #      the exact log level
+        level = logging.DEBUG
+
+    this.logger.setLevel(level)
+    # Set same level on the root logger, if unconfigured
+    if 0 == logging.getLogger().getEffectiveLevel():
+        logging.getLogger().setLevel(level)
 
 
 def create_path_to_xml(sn, adir, fn):

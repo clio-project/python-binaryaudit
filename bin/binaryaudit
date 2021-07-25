@@ -1,0 +1,46 @@
+#!/usr/bin/python3
+
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from binaryaudit import util
+from binaryaudit import abicheck
+from binaryaudit.cli import arg_parser, arg_parser_rpm
+from binaryaudit.db import orchestrator as db_orchestrator
+
+args = arg_parser.parse_args()
+
+util.set_verbosity(args.verbose)
+
+#from dumper import dump
+#dump(args)
+
+if None is args.cmd:
+    if not None is args.is_elf:
+        if abicheck.is_elf(args.is_elf):
+            util.note("'{}' is an ELF binary".format(args.is_elf))
+            sys.exit(0)
+        util.note("'{}' is not an ELF binary".format(args.is_elf))
+        sys.exit(3)
+elif "rpm" == args.cmd:
+    if "group" == args.rpm_cmd:
+        if None is args.source_dir or None is args.out_filename:
+            util.error("Pass package directory and JSON output file")
+            sys.exit(1)
+        abicheck.generate_package_json(args.source_dir, args.out_filename)
+elif "db" == args.cmd:
+    db_orchestrator = db_orchestrator(
+            args.distroname,
+            args.derivative,
+            args.build_id,
+            args.enabletelemetry,
+            util.logger
+    )
+
+    db_orchestrator.initalize_product_id()
+    pass
+else:
+    # This should be caught by argparse anyway
+    raise("Unknown command '{}'".format(args.cmd))
+
