@@ -13,9 +13,6 @@ args = arg_parser.parse_args()
 
 util.set_verbosity(args.verbose)
 
-#from dumper import dump
-#dump(args)
-
 if None is args.cmd:
     if not None is args.is_elf:
         if abicheck.is_elf(args.is_elf):
