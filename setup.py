@@ -15,8 +15,6 @@ setup(name="binaryaudit",
         "python-dateutil",
       ],
       scripts=[
-        "bin/ba_is_elf",
-        "bin/abi_checker_module",
-        "bin/ba_abidiff",
+        "bin/binaryaudit",
       ],
       zip_safe=False)
