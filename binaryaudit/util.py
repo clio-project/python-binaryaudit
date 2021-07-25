@@ -10,6 +10,7 @@ this.error = None
 this.fatal = None
 this.debug = None
 
+
 class logger_wrapper:
     def __init__(self, name="binaryaudit"):
         self.logger = logging.getLogger(name)

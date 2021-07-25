@@ -142,8 +142,8 @@ class orchestrator:
         '''
         if self.db_conn.is_db_connected:
             product_id = self.db_conn.get_product_id(
-                    abicheckermodule.distroname,
-                    abicheckermodule.derivative
+                    self.distroname,
+                    self.derivative
             )
             self.logger.info("Product_id: %s" % product_id)
         else:
