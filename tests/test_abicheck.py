@@ -35,3 +35,10 @@ class AbicheckTestSuite(unittest.TestCase):
             fd.close()
         soname = abicheck.get_soname_from_xml(xml)
         assert "libssl.so.1.1" == soname
+
+    def test_compare_no_suppress(self):
+        ref = os.path.join(data_dir, "libtest1-v0.so")
+        cur = os.path.join(data_dir, "libtest1-v1.so")
+        result = abicheck.compare(ref, cur)
+	assert result is not None
+
