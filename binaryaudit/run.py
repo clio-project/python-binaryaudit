@@ -5,7 +5,6 @@ def run_command(cmd, input, output):
     ''' Runs commands and gets output.
 
     Parameters:
-    # Input cmdn is a list
         cmd (array): The command to be run.
         input: The input for stdin of Popen.
         output: The output for stdout of Popen.
