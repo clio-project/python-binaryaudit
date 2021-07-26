@@ -140,6 +140,8 @@ def generate_package_json(source_dir, out_filename):
                 proc, proc_exit_code = run.run_command(["rpm", "-qpi", f], None, subprocess.PIPE)
                 grep, grep_exit_code = run.run_command(["grep", "Source RPM"], proc.stdout, subprocess.PIPE)
                 source = grep.stdout.read()
+                if "-doc-" in filename or "-docs-" in filename or "kernel-" in filename:
+                    continue
                 source = source.replace(b"Source RPM  : ", b"")
                 source = source.replace(b"\n", b"")
                 rpm_dict.setdefault(source.decode('utf-8'), []).append(filename)
