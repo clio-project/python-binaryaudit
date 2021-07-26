@@ -35,3 +35,22 @@ class AbicheckTestSuite(unittest.TestCase):
             fd.close()
         soname = abicheck.get_soname_from_xml(xml)
         assert "libssl.so.1.1" == soname
+
+    def test_compare_no_suppress(self):
+        ref = os.path.join(data_dir, "libtest1-v0.so")
+        cur = os.path.join(data_dir, "libtest1-v1.so")
+        code, out, cmd = abicheck.compare(ref, cur)
+        expected_out = open(os.path.join(data_dir, 'test_compare_no_suppress_expected')).read()
+        assert code == 4
+        assert out == expected_out
+
+    def test_compare_with_suppress(self):
+        ref = os.path.join(data_dir, "libtest1-v0.so")
+        cur = os.path.join(data_dir, "libtest1-v1.so")
+        sup_1 = os.path.join(data_dir, "test1-0.suppr")
+        sup_2 = os.path.join(data_dir, "test1-1.suppr")
+        suppr = [sup_1, sup_2]
+        code, out, cmd = abicheck.compare(ref, cur, suppr)
+        expected_out = open(os.path.join(data_dir, 'test_compare_with_suppress_expected')).read()
+        assert code == 0
+        assert out == expected_out
