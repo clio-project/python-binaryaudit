@@ -7,24 +7,11 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from binaryaudit import util
 from binaryaudit import abicheck
 from binaryaudit import cli
-from binaryaudit.db import orchestrator as db_orchestrator_cls
+from binaryaudit.orchestrator import ba_orchestrator as orchestrator
 
 args = cli.arg_parser.parse_args()
 
 util.set_verbosity(args.verbose)
-
-db_orchestrator = None
-if 'y' == args.enable_telemetry:
-    cli.validate_telemetry_args(args)
-    db_orchestrator = db_orchestrator_cls(
-            args.product_name,
-            args.derivative,
-            args.build_id,
-            args.enable_telemetry,
-            util.logger,
-            args.db_config
-    )
-    db_orchestrator.initalize_product_id()
 
 if None is args.cmd:
     if not None is args.is_elf:
@@ -36,6 +23,22 @@ if None is args.cmd:
 
     cli.arg_parser.print_help()
 elif "rpm" == args.cmd:
+    rpm_binaryaudit = None
+    if 'y' == args.enable_telemetry:
+        cli.validate_telemetry_args(args)
+        rpm_binaryaudit = orchestrator(
+                args.product_name,
+                args.derivative,
+                args.build_id,
+                args.enable_telemetry,
+                util.logger,
+                args.db_config
+        )
+        rpm_binaryaudit.get_product_id()
+
+    # Next call should be to perform the rpm package binary audit
+    # That needs to be defined as part of ba_orchestrator class
+
     if args.list:
         if None is args.source_dir or None is args.out_filename:
             util.error("Pass package directory and JSON output file")
@@ -48,7 +51,8 @@ elif "db" == args.cmd:
         db_conn.initialize_db()
     except Exception as e:
         util.error(str(e))
-    if args.check_connection:
+
+    if db_conn.is_db_connected:
         util.note("Connection successful")
         sys.exit(0)
     else:
