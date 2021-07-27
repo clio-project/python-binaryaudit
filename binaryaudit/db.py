@@ -10,6 +10,9 @@ from envparse import env
 
 class wrapper:
     '''
+    Wrapper class is a database wrapper to wrap all the calls to
+    DB. All the application or the modules should use the public
+    api of wrapper class
     '''
     def __init__(self, dbconfig, logger) -> None:
         '''
@@ -37,12 +40,12 @@ class wrapper:
         '''
         '''
         connection_url = URL(
-                drivername="mssql+pyodbc",
-                username=env.str('User'),
-                password=env.str('Password'),
+                drivername=env.str('DriverName'),
                 host=env.str('Server'),
                 database=env.str('Database'),
-                query={"driver": "ODBC Driver 17 for SQL Server"}
+                username=env.str('User'),
+                password=env.str('Password'),
+                query={"driver": env.str('Driver')}
         )
         db_engine = create_engine(
                 connection_url,
@@ -54,19 +57,19 @@ class wrapper:
         metadata.reflect(
                 db_engine,
                 only=[
-                    "abi_checker_baseline_tbl",
-                    "abi_checker_product_tbl",
-                    "abi_checker_transaction_details_tbl",
-                    "abi_checker_transaction_main_tbl"
+                    "binaryaudit_checker_baseline_tbl",
+                    "binaryaudit_product_tbl",
+                    "binaryaudit_abi_checker_transaction_details_tbl",
+                    "binaryaudit_transaction_main_tbl"
                 ],
         )
 
         db_map = automap_base(metadata=metadata)
         db_map.prepare()
-        self.abi_checker_baseline_tbl = db_map.classes.abi_checker_baseline_tbl
-        self.abi_checker_product_tbl = db_map.classes.abi_checker_product_tbl
-        self.abi_checker_transaction_details_tbl = db_map.classes.abi_checker_transaction_details_tbl
-        self.abi_checker_transaction_main_tbl = db_map.classes.abi_checker_transaction_main_tbl
+        self.binaryaudit_checker_baseline_tbl = db_map.classes.binaryaudit_checker_baseline_tbl
+        self.binaryaudit_product_tbl = db_map.classes.binaryaudit_product_tbl
+        self.binaryaudit_abi_checker_transaction_details_tbl = db_map.classes.binaryaudit_abi_checker_transaction_details_tbl
+        self.binaryaudit_transaction_main_tbl = db_map.classes.binaryaudit_transaction_main_tbl
 
         self._session = sessionmaker(bind=db_engine, expire_on_commit=False)
 
@@ -82,7 +85,7 @@ class wrapper:
             return True
         return False
 
-    def get_product_id(self, distroname, derivativename) -> int:
+    def get_product_id(self, productname, derivativename) -> int:
         '''
         '''
         product_id = 0
@@ -90,15 +93,15 @@ class wrapper:
         session = self._acquire_session()
         record = (
                 session.query(
-                    self.abi_checker_product_tbl).filter_by(
-                        DistroName=distroname,
+                    self.binaryaudit_product_tbl).filter_by(
+                        ProductName=productname,
                         DerivativeName=derivativename
                     ).one_or_none()
         )
 
         if record is None:
             prd_record = self.abi_checker_product_tbl(
-                    DistroName=distroname,
+                    ProductName=productname,
                     DerivativeName=derivativename
             )
             session.add(prd_record)
@@ -107,7 +110,7 @@ class wrapper:
             record = (
                     session.query(
                         self.abi_checker_product_tbl).filter_by(
-                            DistroName=distroname,
+                            ProductName=productname,
                             DerivativeName=derivativename
                     ).one_or_none())
 
@@ -115,37 +118,3 @@ class wrapper:
         product_id = record.ProductID
 
         return product_id
-
-
-class orchestrator:
-    '''
-    ABI checker orchestrator class for the trigger the abi checker functionality.
-    '''
-
-    def __init__(self, distroname, derivative, build_id, telemetery, logger, db_config="db_config"):
-        '''
-        '''
-        self.logger = logger
-        self.distroname = distroname
-        self.derivative = derivative
-        self.build_id = build_id
-        self.product_id = 0
-        self.enable_telemetry = telemetery
-        self.db_config = db_config
-
-        # Instantiate the db connection to upload results to DB
-        if self.enable_telemetry == 'y':
-            self.db_conn = wrapper(self.db_config, self.logger)
-            self.db_conn.initialize_db()
-
-    def initalize_product_id(self) -> None:
-        '''
-        '''
-        if self.db_conn.is_db_connected:
-            product_id = self.db_conn.get_product_id(
-                    self.distroname,
-                    self.derivative
-            )
-            self.logger.note("Product_id: %s" % product_id)
-        else:
-            self.logger.debug("Not connected")
