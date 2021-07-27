@@ -39,7 +39,7 @@ class wrapper:
         connection_url = URL(
                 drivername="mssql+pyodbc",
                 username=env.str('User'),
-                password=env.str('Pa'),
+                password=env.str('Password'),
                 host=env.str('Server'),
                 database=env.str('Database'),
                 query={"driver": "ODBC Driver 17 for SQL Server"}
@@ -122,7 +122,7 @@ class orchestrator:
     ABI checker orchestrator class for the trigger the abi checker functionality.
     '''
 
-    def __init__(self, distroname, derivative, build_id, telemetery, logger):
+    def __init__(self, distroname, derivative, build_id, telemetery, logger, db_config = "db_config"):
         '''
         '''
         self.logger = logger
@@ -131,10 +131,11 @@ class orchestrator:
         self.build_id = build_id
         self.product_id = 0
         self.enable_telemetry = telemetery
+        self.db_config = db_config
 
         # Instantiate the db connection to upload results to DB
         if self.enable_telemetry == 'y':
-            self.db_conn = wrapper("db_config", self.logger)
+            self.db_conn = wrapper(self.db_config, self.logger)
             self.db_conn.initialize_db()
 
     def initalize_product_id(self) -> None:

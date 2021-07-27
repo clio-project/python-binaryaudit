@@ -7,24 +7,22 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from binaryaudit import util
 from binaryaudit import abicheck
 from binaryaudit import cli
-from binaryaudit.db import orchestrator as db_orchestrator
+from binaryaudit.db import orchestrator as db_orchestrator_cls
 
 args = cli.arg_parser.parse_args()
 
 util.set_verbosity(args.verbose)
 
-import dumper
-dumper.dump(args)
-
 db_orchestrator = None
 if 'y' == args.enable_telemetry:
     cli.validate_telemetry_args(args)
-    db_orchestrator = db_orchestrator(
+    db_orchestrator = db_orchestrator_cls(
             args.product_name,
             args.derivative,
             args.build_id,
             args.enable_telemetry,
-            util.logger
+            util.logger,
+            args.db_config
     )
     db_orchestrator.initalize_product_id()
 
@@ -36,12 +34,24 @@ if None is args.cmd:
         util.note("'{}' is not an ELF binary".format(args.is_elf))
         sys.exit(3)
 elif "rpm" == args.cmd:
-    if "list" == args.rpm_cmd:
+    if args.list:
         if None is args.source_dir or None is args.out_filename:
             util.error("Pass package directory and JSON output file")
             sys.exit(1)
         abicheck.generate_package_json(args.source_dir, args.out_filename)
 elif "db" == args.cmd:
+    from binaryaudit.db import wrapper as db_wrapper
+    try:
+        db_conn = db_wrapper(args.db_config, util.logger)
+        db_conn.initialize_db()
+    except Exception as e:
+        util.error(str(e))
+    if args.check_connection:
+        util.note("Connection successful")
+        sys.exit(0)
+    else:
+        util.note("Connection unsuccessful")
+        sys.exit(1)
     pass
 else:
     # This should be caught by argparse anyway
