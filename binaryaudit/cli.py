@@ -12,20 +12,20 @@ arg_parser.add_argument("--is-elf", action="store", metavar="/path/to/elf/file",
 
 telemetry_args = arg_parser.add_argument_group('telemetry arguments')
 telemetry_args.add_argument('-t', '--enable-telemetry', action='store', required=False,
-                        default="n", help="Enable the data storing to telemetry (default: n)")
+                            default="n", help="Enable the data storing to telemetry (default: n)")
 telemetry_args.add_argument('-b', '--build-id', action='store', required=False,
-                           help="Reference to the particular build.")
+                            help="Reference to the particular build.")
 telemetry_args.add_argument('-d', '--product-name', action='store', required=False,
-                           help="Name of the product to be tracked, e.g. a distro or a project name.")
+                            help="Name of the product to be tracked, e.g. a distro or a project name.")
 telemetry_args.add_argument('-e', '--derivative', action='store', required=False,
-                           help="Derivative name")
+                            help="Derivative name")
 telemetry_args.add_argument('-u', '--buildurl', action='store', required=False,
-                           help="Build URL")
+                            help="Build URL")
 telemetry_args.add_argument('-l', '--logurl', action='store', required=False,
-                           help="URL of log files")
+                            help="URL of log files")
 
 telemetry_args.add_argument('-v', '--verbose', action='store_true',
-                        help="Verbose output.")
+                            help="Verbose output.")
 
 # If a subcommand has been called, read the name from args.cmd
 arg_parser_subs = arg_parser.add_subparsers(help="Subcommands", dest="cmd")
@@ -48,7 +48,9 @@ arg_parser_rpm_list.add_argument('--out-filename', action="store", help="Output 
 # binaryaudit db ..
 arg_parser_db = arg_parser_subs.add_parser("db", help="Database CLI wrapper.")
 
-##### functions #####
+
+# ##### functions #####
+
 
 def validate_telemetry_args(args):
     if args.enable_telemetry:
