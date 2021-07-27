@@ -52,7 +52,7 @@ def _error(*args):
 
 
 def _fatal(*args):
-    this.logger.critical("".join(args))
+    this.logger.fatal("".join(args))
 
 
 def _debug(*args):
