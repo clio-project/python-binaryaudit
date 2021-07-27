@@ -60,8 +60,7 @@ def _debug(*args):
 
 
 def create_logger(name="binaryaudit"):
-    if None is this.logger:
-        logger = logger_wrapper(name)
+    logger = logger_wrapper(name)
     return logger
 
 
