@@ -6,12 +6,27 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from binaryaudit import util
 from binaryaudit import abicheck
-from binaryaudit.cli import arg_parser, arg_parser_rpm
+from binaryaudit import cli
 from binaryaudit.db import orchestrator as db_orchestrator
 
-args = arg_parser.parse_args()
+args = cli.arg_parser.parse_args()
 
 util.set_verbosity(args.verbose)
+
+import dumper
+dumper.dump(args)
+
+db_orchestrator = None
+if 'y' == args.enable_telemetry:
+    cli.validate_telemetry_args(args)
+    db_orchestrator = db_orchestrator(
+            args.product_name,
+            args.derivative,
+            args.build_id,
+            args.enable_telemetry,
+            util.logger
+    )
+    db_orchestrator.initalize_product_id()
 
 if None is args.cmd:
     if not None is args.is_elf:
@@ -27,15 +42,6 @@ elif "rpm" == args.cmd:
             sys.exit(1)
         abicheck.generate_package_json(args.source_dir, args.out_filename)
 elif "db" == args.cmd:
-    db_orchestrator = db_orchestrator(
-            args.distroname,
-            args.derivative,
-            args.build_id,
-            args.enabletelemetry,
-            util.logger
-    )
-
-    db_orchestrator.initalize_product_id()
     pass
 else:
     # This should be caught by argparse anyway
