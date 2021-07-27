@@ -33,6 +33,8 @@ if None is args.cmd:
             sys.exit(0)
         util.note("'{}' is not an ELF binary".format(args.is_elf))
         sys.exit(3)
+
+    cli.arg_parser.print_help()
 elif "rpm" == args.cmd:
     if args.list:
         if None is args.source_dir or None is args.out_filename:
@@ -53,7 +55,3 @@ elif "db" == args.cmd:
         util.note("Connection unsuccessful")
         sys.exit(1)
     pass
-else:
-    # This should be caught by argparse anyway
-    raise("Unknown command '{}'".format(args.cmd))
-
