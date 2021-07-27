@@ -7,9 +7,9 @@ from . import util
 # Common, reusable.
 arg_parser_common = argparse.ArgumentParser(add_help=False)
 arg_parser_common.add_argument("--db-config", action="store", default="db_config", metavar="/path/to/file",
-                        help="Path to the config file in the env format. If omited, default is 'db_config' in CWD.")
+                               help="Path to the config file in the env format. If omited, default is 'db_config' in CWD.")
 arg_parser_common.add_argument('-v', '--verbose', action='store_true',
-                            help="Verbose output.")
+                               help="Verbose output.")
 
 
 # Telemetry, reusable.
@@ -30,7 +30,8 @@ telemetry_args.add_argument('-l', '--logurl', action='store', required=False,
 
 
 # Top level.
-arg_parser = argparse.ArgumentParser(prog="binaryaudit", description="Tools for ELF audit.", parents=[arg_parser_common, arg_parser_telemetry])
+arg_parser = argparse.ArgumentParser(prog="binaryaudit", description="Tools for ELF audit.",
+                                     parents=[arg_parser_common, arg_parser_telemetry])
 arg_parser.add_argument("--is-elf", action="store", metavar="/path/to/file",
                         help="Determine whether a file is an ELF artifact. Exit is zero if true.")
 
@@ -45,7 +46,8 @@ arg_parser_subs = arg_parser.add_subparsers(help="Subcommands", dest="cmd")
 
 # binaryaudit rpm ...
 arg_parser_rpm = arg_parser_subs.add_parser("rpm", help="RPM tools.", parents=[arg_parser_common])
-arg_parser_rpm.add_argument('--list', action="store_true", help="Read RPM packages in a directory and create a list grouped by SRPM.")
+arg_parser_rpm.add_argument('--list', action="store_true",
+                            help="Read RPM packages in a directory and create a list grouped by SRPM.")
 arg_parser_rpm.add_argument('--source-dir', action="store", help="RPM package directory.")
 arg_parser_rpm.add_argument('--out-filename', action="store", help="Output filename.")
 

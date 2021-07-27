@@ -122,7 +122,7 @@ class orchestrator:
     ABI checker orchestrator class for the trigger the abi checker functionality.
     '''
 
-    def __init__(self, distroname, derivative, build_id, telemetery, logger, db_config = "db_config"):
+    def __init__(self, distroname, derivative, build_id, telemetery, logger, db_config="db_config"):
         '''
         '''
         self.logger = logger
