@@ -49,7 +49,7 @@ class wrapper:
                 pool_recycle=self._connection_timeout
         )
 
-        self.logger.info("Initializing database connection")
+        self.logger.note("Initializing database connection")
         metadata = MetaData()
         metadata.reflect(
                 db_engine,
@@ -145,6 +145,6 @@ class orchestrator:
                     self.distroname,
                     self.derivative
             )
-            self.logger.info("Product_id: %s" % product_id)
+            self.logger.note("Product_id: %s" % product_id)
         else:
             self.logger.debug("Not connected")
