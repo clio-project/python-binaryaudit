@@ -11,6 +11,7 @@ setup(name="binaryaudit",
       packages=["binaryaudit"],
       install_requires=[
         "sqlalchemy",  # XXX Possibly the db wrapper is to be standalone
+        "pyodbc",
         "envparse",
         "python-dateutil",
       ],
