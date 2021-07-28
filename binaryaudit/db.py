@@ -100,7 +100,7 @@ class wrapper:
         )
 
         if record is None:
-            prd_record = self.abi_checker_product_tbl(
+            prd_record = self.binaryaudit_product_tbl(
                     ProductName=productname,
                     DerivativeName=derivativename
             )
@@ -109,7 +109,7 @@ class wrapper:
 
             record = (
                     session.query(
-                        self.abi_checker_product_tbl).filter_by(
+                        self.binaryaudit_product_tbl).filter_by(
                             ProductName=productname,
                             DerivativeName=derivativename
                     ).one_or_none())
