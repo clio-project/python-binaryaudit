@@ -2,6 +2,7 @@
 
 from binaryaudit.db import wrapper as db_wrapper
 
+
 class ba_orchestrator:
     '''
     Orchestrator for binaryaudit. The role of this orchestrator is
