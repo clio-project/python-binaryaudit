@@ -1,15 +1,16 @@
 
 import argparse
 
-from . import util
-
 
 # Common, reusable.
 arg_parser_common = argparse.ArgumentParser(add_help=False)
-arg_parser_common.add_argument("--db-config", action="store", default="db_config", metavar="/path/to/file",
-                               help="Path to the config file in the env format. If omited, default is 'db_config' in CWD.")
 arg_parser_common.add_argument('-v', '--verbose', action='store_true',
                                help="Verbose output.")
+
+# Database, reusable
+arg_parser_db = argparse.ArgumentParser(add_help=False)
+arg_parser_db.add_argument("--db-config", action="store", default="db_config", metavar="/path/to/file",
+                           help="Path to the config file in the env format. If omited, default is 'db_config' in CWD.")
 
 
 # Telemetry, reusable.
@@ -31,7 +32,7 @@ telemetry_args.add_argument('-l', '--logurl', action='store', required=False,
 
 # Top level.
 arg_parser = argparse.ArgumentParser(prog="binaryaudit", description="Tools for ELF audit.",
-                                     parents=[arg_parser_common, arg_parser_telemetry])
+                                     parents=[arg_parser_common])
 arg_parser.add_argument("--is-elf", action="store", metavar="/path/to/file",
                         help="Determine whether a file is an ELF artifact. Exit is zero if true.")
 
@@ -45,7 +46,8 @@ arg_parser_subs = arg_parser.add_subparsers(help="Subcommands", dest="cmd")
 
 
 # binaryaudit rpm ...
-arg_parser_rpm = arg_parser_subs.add_parser("rpm", help="RPM tools.", parents=[arg_parser_common])
+arg_parser_rpm = arg_parser_subs.add_parser("rpm", help="RPM tools.",
+                                            parents=[arg_parser_common, arg_parser_db, arg_parser_telemetry])
 arg_parser_rpm.add_argument('--list', action="store_true",
                             help="Read RPM packages in a directory and create a list grouped by SRPM.")
 arg_parser_rpm.add_argument('--source-dir', action="store", help="RPM package directory.")
@@ -53,7 +55,8 @@ arg_parser_rpm.add_argument('--out-filename', action="store", help="Output filen
 
 
 # binaryaudit db ..
-arg_parser_db = arg_parser_subs.add_parser("db", help="Database CLI wrapper.", parents=[arg_parser_common])
+arg_parser_db = arg_parser_subs.add_parser("db", help="Database CLI wrapper.",
+                                           parents=[arg_parser_common, arg_parser_db])
 arg_parser_db.add_argument('--check-connection', action='store_true', required=False,
                            help="Test DB connection. Exit with 0 if connection could be established.")
 
@@ -64,4 +67,4 @@ arg_parser_db.add_argument('--check-connection', action='store_true', required=F
 def validate_telemetry_args(args):
     if args.enable_telemetry:
         if not args.build_id or not args.product_name or not args.derivative:
-            util.fatal("With --enable-telemetry the options --build-id, --product-name and --derivative become required")
+            raise argparse.ArgumentError(None, "Options --build-id, --product-name and --derivative are required")
