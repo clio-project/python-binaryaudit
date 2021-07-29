@@ -35,6 +35,7 @@ elif "rpm" == args.cmd:
                 args.db_config
         )
         rpm_binaryaudit.get_product_id()
+        rpm_binaryaudit.perform_binary_audit(args.buildurl, args.logurl)
 
     # Next call should be to perform the rpm package binary audit
     # That needs to be defined as part of ba_orchestrator class
