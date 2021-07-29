@@ -4,6 +4,8 @@ from sqlalchemy.engine.url import URL
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql import func
+from sqlalchemy import desc
 
 from envparse import env
 
@@ -118,3 +120,40 @@ class wrapper:
         product_id = record.ProductID
 
         return product_id
+
+    def add_transaction(self, build_id, product_id, baseline_id, build_url, log_url, result):
+        session = self._acquire_session()
+        session.add(self.binaryaudit_transaction_main_tbl(
+                BuildID=build_id,
+                ProductID=product_id,
+                BaselineID=baseline_id,
+                BuildUrl=build_url,
+                LogUrl=log_url,
+                Result=result))
+        session.commit()
+        self._release_session(session)
+
+    def add_baseline(self, build_id, product_id, data, dt=None):
+        session = self._acquire_session()
+        if not dt:
+            dt = func.now()
+        session.add(self.binaryaudit_checker_baseline_tbl(
+                ProductID=product_id,
+                BuildID=build_id,
+                PackageData=data,
+                DateCreated=dt))
+        session.commit()
+        self._release_session(session)
+
+    def get_latest_baseline(self, product_id):
+        session = self._acquire_session()
+        record = (
+                session.query(
+                    self.binaryaudit_checker_baseline_tb
+                ).filter_by(
+                    ProductID=product_id,
+                ).order_by(desc("DateCreated"))
+                .first())
+        self._release_session(session)
+
+        return record.BuildID, record.PackageData
