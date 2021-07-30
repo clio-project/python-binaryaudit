@@ -1,5 +1,8 @@
+
+import configparser
 import json
 import os
+import rpmfile
 import subprocess
 from binaryaudit import run
 from xml.etree import ElementTree
@@ -173,6 +176,16 @@ def diff_get_bits(c):
 
     return a
 
+def filter_rpm(filename, filter_list):
+    ''' Searches for specified words in package name to filter out.
+
+        Paramters:
+            filename (str): The name of the RPM file
+            filter_list (array): The list of filter words
+    '''
+    if any(word in filename for word in filter_list):
+        return True
+    return False
 
 def diff_get_bit(c):
     ''' Circle through the return value bits.
@@ -200,24 +213,42 @@ def diff_get_bit(c):
 
 
 def generate_package_json(source_dir, out_filename):
-    ''' Gets input directory of RPMs, groups packages based on source RPM, and outputs to JSON file.
+    ''' Gets input directory of RPMs, filters out unwanted packages, groups packages based on source RPM, and outputs to JSON file.
 
         Parameters:
             source_dir (str): The path to the input directory.
             out_filename (str): The name of the output JSON file
     '''
+    config = configparser.ConfigParser()
+    config.read('../conf/binaryaudit.conf')
+    filter_patterns = config['Mariner']['rpms_filter_patterns']
+    filter_list = filter_patterns.split(',')
     rpm_dict = {}
     for filename in os.listdir(source_dir):
         f = os.path.join(source_dir, filename)
         if os.path.isfile(f):
             if f.endswith(".rpm"):
-                proc, proc_exit_code = run.run_command(["rpm", "-qpi", f], None, subprocess.PIPE)
-                grep, grep_exit_code = run.run_command(["grep", "Source RPM"], proc.stdout, subprocess.PIPE)
-                source = grep.stdout.read()
-                if "-doc-" in filename or "-docs-" in filename or "kernel-" in filename:
-                    continue
-                source = source.replace(b"Source RPM  : ", b"")
-                source = source.replace(b"\n", b"")
+                with rpmfile.open(f) as rpm:
+                    source = rpm.headers.get("sourcerpm")
+                    if filter_rpm(filename, filter_list) == True:
+                        continue
+                    if "-debuginfo-" not in filename and "-devel-" not in filename:    
+                        has_so = False
+                        for member in rpm.getmembers():
+                            member_name = str(member)
+                            if ".so" in member_name:
+                                has_so = True
+                                break
+                        if has_so == False:
+                            continue
                 rpm_dict.setdefault(source.decode('utf-8'), []).append(filename)
+    for key, value in list(rpm_dict.items()):
+        debug_devel_only = True
+        for values in value:
+            if "-debuginfo-" not in values and "-devel-" not in values:
+                debug_devel_only = False
+                break
+        if debug_devel_only == True:
+            del rpm_dict[key]
     with open(out_filename, "w") as outputFile:
         json.dump(rpm_dict, outputFile, indent=2)
