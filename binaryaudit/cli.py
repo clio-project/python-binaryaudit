@@ -60,6 +60,14 @@ arg_parser_db_cmd = arg_parser_subs.add_parser("db", help="Database CLI wrapper.
 arg_parser_db_cmd.add_argument('--check-connection', action='store_true', required=False,
                                help="Test DB connection. Exit with 0 if connection could be established.")
 
+# binaryaudit mariner
+arg_parser_mariner = arg_parser_subs.add_parser("mariner", help="Mariner Abipkgdiff Wrapper.")
+required_args = arg_parser_mariner.add_argument_group('mandatory arguments')
+required_args.add_argument('-i', '--input-dir', action='store', required=True,
+                           help="Path to local dir with new rpms.")
+optional_args = arg_parser_mariner.add_argument_group('optional arguments')
+optional_args.add_argument('-d', '--debug', action='store', required=False,
+                           help="Option to show debug messages")
 
 # binaryaudit poky ...
 arg_parser_poky = arg_parser_subs.add_parser("poky", help="RPM tools frontend.",

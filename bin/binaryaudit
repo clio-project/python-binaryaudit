@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import configparser
 import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -10,6 +11,8 @@ from binaryaudit import util
 from binaryaudit import abicheck
 from binaryaudit import cli
 from binaryaudit.orchestrator import ba_orchestrator as orchestrator
+from binaryaudit import dnf
+from binaryaudit.cli import arg_parser, arg_parser_rpm
 
 args = cli.arg_parser.parse_args()
 
@@ -154,3 +157,14 @@ elif "poky" == args.cmd:
             data = f.read()
             f.close
         db_conn.insert_ba_baseline_data(args.build_id, product_id, data)
+elif "mariner" == args.cmd:
+    config = configparser.ConfigParser()
+    config.read('../conf/binaryaudit.conf')
+    new_json_file = config['Mariner']['new_json_file_name']
+    old_json_file = config['Mariner']['old_json_file_name']
+    abicheck.generate_package_json(args.input_dir, new_json_file, args.debug)
+    dnf.download(args.input_dir, new_json_file, old_json_file, args.debug)
+
+else:
+    # This should be caught by argparse anyway
+    raise("Unknown command '{}'".format(args.cmd))
