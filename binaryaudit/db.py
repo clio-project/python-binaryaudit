@@ -6,8 +6,6 @@ from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import func
 from sqlalchemy import desc
-
-
 from envparse import env
 
 
@@ -91,9 +89,8 @@ class wrapper:
 
     def get_product_id(self, productname, derivativename) -> int:
         '''
-        verifies that the object exists
-        if not, inserts the new object
-        returns the object's Product ID
+        verifies that the object exists if not, inserts the new object
+        and returns the object's Product ID
         '''
         product_id = 0
 
@@ -141,7 +138,7 @@ class wrapper:
         session.add(new_tbl_entry)
         self._flush_session(session)
 
-    def insert_baseline_tbl(self, build_id, product_id, pkg_data, date) -> None:
+    def insert_ba_baseline_data(self, build_id, product_id, pkg_data, date) -> None:
         '''
         inserts new object to the [baseline table]
         '''
@@ -158,7 +155,7 @@ class wrapper:
         session.add(new_tbl_entry)
         self._flush_session(session)
 
-    def insert_details_tbl(self, 
+    def insert_ba_transaction_details(self, 
                             build_id, 
                             item_name, 
                             base_version, 
@@ -183,7 +180,7 @@ class wrapper:
         session.add(new_tbl_entry)
         self._flush_session(session)
 
-    def update_test_result(self, build_id, result) -> None:
+    def update_ba_test_result(self, build_id, result) -> None:
         '''
         locates object with corresponding Build ID in the [main table]
         updates the object's Result entity with test outcome
@@ -193,7 +190,7 @@ class wrapper:
         entry.Result = result
         self._flush_session(session)
     
-    def get_latest_baseline(self, product_id):
+    def get_ba_latest_baseline(self, product_id):
         '''
         locates and returns the latest baseline object data
         '''
