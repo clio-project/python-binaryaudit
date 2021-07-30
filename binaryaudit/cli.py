@@ -17,9 +17,9 @@ arg_parser_telemetry = argparse.ArgumentParser(add_help=False)
 telemetry_args = arg_parser_telemetry.add_argument_group('telemetry arguments')
 telemetry_args.add_argument('-t', '--enable-telemetry', action='store', required=False,
                             default="n", help="Enable the data storing to telemetry (default: n)")
-telemetry_args.add_argument('-b', '--build-id', action='store', required=True,
+telemetry_args.add_argument('-b', '--build-id', action='store', required=False,
                             help="Reference to the particular build.")
-telemetry_args.add_argument('-d', '--product-name', action='store', required=True,
+telemetry_args.add_argument('-d', '--product-name', action='store', required=False,
                             help="Name of the product to be tracked, e.g. a distro or a project name.")
 telemetry_args.add_argument('-e', '--derivative', action='store', required=False,
                             help="Derivative name")
