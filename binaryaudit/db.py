@@ -143,7 +143,7 @@ class wrapper:
         inserts new object to the [baseline table]
         '''
         if not date:
-            dt = func.now()
+            date = func.now()
         session = self._acquire_session()
         new_tbl_entry = self.binaryaudit_checker_baseline_tbl(
                         BuildID=build_id, 
