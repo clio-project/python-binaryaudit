@@ -4,6 +4,8 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+import argparse
+
 from binaryaudit import util
 from binaryaudit import abicheck
 from binaryaudit import cli
@@ -25,7 +27,11 @@ if None is args.cmd:
 elif "rpm" == args.cmd:
     rpm_binaryaudit = None
     if 'y' == args.enable_telemetry:
-        cli.validate_telemetry_args(args)
+        try:
+            cli.validate_telemetry_args(args)
+        except argparse.ArgumentError as e:
+            util.fatal(str(e))
+            sys.exit(3)
         rpm_binaryaudit = orchestrator(
                 args.product_name,
                 args.derivative,

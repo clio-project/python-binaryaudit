@@ -205,6 +205,3 @@ class wrapper:
         self._release_session(session)
 
         return record.BuildID, record.PackageData
-
-
-    
