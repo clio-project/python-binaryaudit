@@ -129,10 +129,10 @@ class wrapper:
         '''
         session = self._acquire_session()
         new_tbl_entry = self.binaryaudit_transaction_main_tbl(
-                        BuildID=build_id, 
-                        ProductID=product_id, 
-                        BuildUrl=buildurl, 
-                        LogUrl=logurl, 
+                        BuildID=build_id,
+                        ProductID=product_id,
+                        BuildUrl=buildurl,
+                        LogUrl=logurl,
                         Result='pending'
         )
         session.add(new_tbl_entry)
@@ -146,8 +146,8 @@ class wrapper:
             date = func.now()
         session = self._acquire_session()
         new_tbl_entry = self.binaryaudit_checker_baseline_tbl(
-                        BuildID=build_id, 
-                        ProductID=product_id, 
+                        BuildID=build_id,
+                        ProductID=product_id,
                         PackageData=pkg_data,
                         DateCreated=date
 
@@ -155,20 +155,20 @@ class wrapper:
         session.add(new_tbl_entry)
         self._flush_session(session)
 
-    def insert_ba_transaction_details(self, 
-                            build_id, 
-                            item_name, 
-                            base_version, 
-                            new_version, 
-                            exec_time, 
-                            result, 
-                            res_details) -> None:
+    def insert_ba_transaction_details(self,
+                                      build_id,
+                                      item_name,
+                                      base_version,
+                                      new_version,
+                                      exec_time,
+                                      result,
+                                      res_details) -> None:
         '''
         inserts new object to the [details table]
         '''
         session = self._acquire_session()
-        new_tbl_entry = self.binaryaudit_abi_checker_transaction_details_tbl( 
-                        BuildID=build_id, 
+        new_tbl_entry = self.binaryaudit_abi_checker_transaction_details_tbl(
+                        BuildID=build_id,
                         ItemName=item_name,
                         BaseVersion=base_version,
                         NewVersion=new_version,
@@ -189,7 +189,7 @@ class wrapper:
         entry = session.query(self.binaryaudit_transaction_main_tbl).get(build_id)
         entry.Result = result
         self._flush_session(session)
-    
+
     def get_ba_latest_baseline(self, product_id):
         '''
         locates and returns the latest baseline object data
