@@ -123,7 +123,7 @@ class wrapper:
 
         return product_id
 
-    def insert_main_transaction(self, build_id, product_id, buildurl="", logurl="") -> None:
+    def insert_main_transaction(self, build_id, product_id, buildurl="", logurl="", result="pending", baseline_id = None) -> None:
         '''
         inserts new object to the [main table]
         '''
@@ -131,9 +131,10 @@ class wrapper:
         new_tbl_entry = self.binaryaudit_transaction_main_tbl(
                         BuildID=build_id,
                         ProductID=product_id,
+                        BaselineID=baseline_id,
                         BuildUrl=buildurl,
                         LogUrl=logurl,
-                        Result='pending'
+                        Result=result
         )
         session.add(new_tbl_entry)
         self._flush_session(session)
