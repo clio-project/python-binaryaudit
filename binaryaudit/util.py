@@ -44,7 +44,7 @@ def _note(*args):
 
 
 def _warn(*args):
-    this.logger.warning("".join(args))
+    this.logger.warn("".join(args))
 
 
 def _error(*args):
