@@ -60,10 +60,10 @@ elif "db" == args.cmd:
     except Exception as e:
         util.error(str(e))
 
-    if db_conn.is_db_connected:
-        util.note("Connection successful")
-        sys.exit(0)
-    else:
-        util.note("Connection unsuccessful")
-        sys.exit(1)
-    pass
+    if args.check_connection:
+        if db_conn.is_db_connected:
+            util.note("Connection successful")
+            sys.exit(0)
+        else:
+            util.note("Connection unsuccessful")
+            sys.exit(1)

@@ -55,9 +55,9 @@ arg_parser_rpm.add_argument('--out-filename', action="store", help="Output filen
 
 
 # binaryaudit db ..
-arg_parser_db = arg_parser_subs.add_parser("db", help="Database CLI wrapper.",
+arg_parser_db_cmd = arg_parser_subs.add_parser("db", help="Database CLI wrapper.",
                                            parents=[arg_parser_common, arg_parser_db])
-arg_parser_db.add_argument('--check-connection', action='store_true', required=False,
+arg_parser_db_cmd.add_argument('--check-connection', action='store_true', required=False,
                            help="Test DB connection. Exit with 0 if connection could be established.")
 
 
