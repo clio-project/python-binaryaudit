@@ -67,8 +67,14 @@ def serialize_artifacts(adir, id):
     '''
     for fn in glob.iglob(id + "/**/**", recursive=True):
         if os.path.isfile(fn) and not os.path.islink(fn):
-            if not is_elf(fn):
+            is_elf_artifact = False
+            try:
+                is_elf_artifact = is_elf(fn)
+            except Exception as e:
+                util.warn(str(e))
+            if not is_elf_artifact:
                 continue
+
             # If there's no error, out is the XML representation
             ret, out, cmd = serialize(fn)
             util.note(" ".join(cmd))
