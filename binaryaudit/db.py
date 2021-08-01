@@ -138,7 +138,7 @@ class wrapper:
         session.add(new_tbl_entry)
         self._flush_session(session)
 
-    def insert_ba_baseline_data(self, build_id, product_id, pkg_data, date) -> None:
+    def insert_ba_baseline_data(self, build_id, product_id, pkg_data, date=None) -> None:
         '''
         inserts new object to the [baseline table]
         '''
