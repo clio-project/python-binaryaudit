@@ -123,7 +123,8 @@ class wrapper:
 
         return product_id
 
-    def insert_main_transaction(self, build_id, product_id, buildurl="", logurl="", result="pending", baseline_id = None) -> None:
+    def insert_main_transaction(self, build_id, product_id, buildurl="", logurl="",
+                                result="pending", baseline_id=None) -> None:
         '''
         inserts new object to the [main table]
         '''
