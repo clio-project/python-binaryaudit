@@ -4,6 +4,8 @@ import json
 import os
 import rpmfile
 import subprocess
+
+from binaryaudit import conf
 from binaryaudit import run
 from xml.etree import ElementTree
 import glob
@@ -176,7 +178,7 @@ def diff_get_bits(c):
 
     return a
 
-def filter_rpm(filename, filter_list, debug):
+def filter_rpm(filename, filter_list):
     ''' Searches for specified words in package name to filter out.
 
         Paramters:
@@ -184,9 +186,7 @@ def filter_rpm(filename, filter_list, debug):
             filter_list (array): The list of filter words
     '''
     if any(word in filename for word in filter_list):
-        if debug:
-            util.set_verbosity(True)
-            util.note("Dropping " + filename + " because it contains a filter word")
+        util.note("Dropping " + filename + " because it contains a filter word")
         return True
     return False
 
@@ -222,10 +222,7 @@ def generate_package_json(source_dir, out_filename):
             source_dir (str): The path to the input directory.
             out_filename (str): The name of the output JSON file
     '''
-    config = configparser.ConfigParser()
-    #TODO: Not sure relative paths for default conf file.
-    config.read('../conf/binaryaudit.conf')
-    filter_patterns = config['Mariner']['rpms_filter_patterns']
+    filter_patterns = conf.get_config("Mariner", "rpms_filter_patterns")
     filter_list = filter_patterns.split(',')
     rpm_dict = {}
     for filename in os.listdir(source_dir):
@@ -234,7 +231,7 @@ def generate_package_json(source_dir, out_filename):
             if f.endswith(".rpm"):
                 with rpmfile.open(f) as rpm:
                     source = rpm.headers.get("sourcerpm")
-                    if filter_rpm(filename, filter_list, debug) == True:
+                    if filter_rpm(filename, filter_list) == True:
                         continue
                     if "-debuginfo-" not in filename and "-devel-" not in filename:    
                         has_so = False
@@ -244,9 +241,7 @@ def generate_package_json(source_dir, out_filename):
                                 has_so = True
                                 break
                         if has_so == False:
-                            if debug:
-                                util.set_verbosity(True)
-                                util.note("Dropping " + filename + " RPM because it has no shared object file")
+                            util.note("Dropping " + filename + " RPM because it has no shared object file")
                             continue
                 rpm_dict.setdefault(source.decode('utf-8'), []).append(filename)
     for key, value in list(rpm_dict.items()):
@@ -256,9 +251,7 @@ def generate_package_json(source_dir, out_filename):
                 debug_devel_only = False
                 break
         if debug_devel_only == True:
-            if debug:
-                util.set_verbosity(True)
-                util.note("Dropping files with " + key + " source name because there are only debuginfo and/or devel files")
+            util.note("Dropping files with " + key + " source name because there are only debuginfo and/or devel files")
             del rpm_dict[key]
     with open(out_filename, "w") as outputFile:
         json.dump(rpm_dict, outputFile, indent=2)
