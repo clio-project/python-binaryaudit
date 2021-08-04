@@ -206,4 +206,4 @@ class wrapper:
                 .first())
         self._release_session(session)
 
-        return record.BuildID, record.PackageData
+        return record.ID, record.PackageData
