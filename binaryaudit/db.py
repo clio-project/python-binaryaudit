@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import func
 from sqlalchemy import desc
 from envparse import env
+from datetime import datetime
 
 TRANSACTION_MAIN_RESULT_FAILED = "FAILED"
 TRANSACTION_MAIN_RESULT_PASSED = "PASSED"
@@ -135,8 +136,10 @@ class wrapper:
         inserts new object to the [main table]
         '''
         session = self._acquire_session()
+        date = datetime.utcnow()
         new_tbl_entry = self.binaryaudit_transaction_main_tbl(
                         BuildID=build_id,
+                        DateTimeUTC=date,
                         ProductID=product_id,
                         BaselineID=baseline_id,
                         BuildUrl=buildurl,
@@ -175,7 +178,9 @@ class wrapper:
         inserts new object to the [details table]
         '''
         session = self._acquire_session()
+        date = datetime.utcnow()
         new_tbl_entry = self.binaryaudit_abi_checker_transaction_details_tbl(
+                        DateTimeUTC=date,
                         BuildID=build_id,
                         ItemName=item_name,
                         BaseVersion=base_version,
