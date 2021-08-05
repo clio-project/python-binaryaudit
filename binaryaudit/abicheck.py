@@ -120,6 +120,15 @@ def diff_is_incompatible_change(c):
 
 
 def diff_get_bits(c):
+    ''' Circle through the return value bits
+
+        Parameters:
+            c (int) - Return value to parse.
+
+        Returns:
+            Array with the text representations of bits.
+
+    '''
     a = []
     if diff_is_ok(c):
         a.append("OK")
@@ -132,7 +141,35 @@ def diff_get_bits(c):
     if diff_is_incompatible_change(c):
         a.append("INCOMPATIBLE_CHANGE")
 
+    if 0 == len(a):
+        raise ValueError("Value '{}' can't be interpreted as a libabigail return status.".format(c))
+
     return a
+
+
+def diff_get_bit(c):
+    ''' Circle through the return value bits.
+
+        Parameters:
+            c (int) - Return value to parse.
+
+        Returns:
+            The text representation for the most relevant bit.
+    '''
+
+    # Order matters.
+    if diff_is_ok(c):
+        return "OK"
+    if diff_is_usage_error(c):
+        return "USAGE_ERROR"
+    if diff_is_error(c):
+        return "ERROR"
+    if diff_is_incompatible_change(c):
+        return "INCOMPATIBLE_CHANGE"
+    if diff_is_change(c):
+        return "CHANGE"
+
+    raise ValueError("Value '{}' can't be interpreted as a libabigail return status.".format(c))
 
 
 def generate_package_json(source_dir, out_filename):
