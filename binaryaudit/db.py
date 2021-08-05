@@ -8,6 +8,12 @@ from sqlalchemy.sql import func
 from sqlalchemy import desc
 from envparse import env
 
+TRANSACTION_MAIN_RESULT_FAILED = "FAILED"
+TRANSACTION_MAIN_RESULT_PASSED = "PASSED"
+TRANSACTION_MAIN_RESULT_PENDING = "PENDING"
+
+VERSION_NOT_AVAILABLE = "n/a"
+
 
 class wrapper:
     '''
@@ -124,7 +130,7 @@ class wrapper:
         return product_id
 
     def insert_main_transaction(self, build_id, product_id, buildurl="", logurl="",
-                                result="pending", baseline_id=None) -> None:
+                                result=TRANSACTION_MAIN_RESULT_PENDING, baseline_id=None) -> None:
         '''
         inserts new object to the [main table]
         '''
