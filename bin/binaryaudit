@@ -68,8 +68,6 @@ elif "db" == args.cmd:
             util.note("Connection unsuccessful")
             sys.exit(1)
 elif "poky" == args.cmd:
-    import dumper
-    dumper.dump(args)
     from binaryaudit import poky
     from binaryaudit.db import TRANSACTION_MAIN_RESULT_FAILED, TRANSACTION_MAIN_RESULT_PASSED, TRANSACTION_MAIN_RESULT_PENDING
 
