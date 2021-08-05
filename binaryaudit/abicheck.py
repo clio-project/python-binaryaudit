@@ -1,8 +1,10 @@
 
+import json
+import os
 import subprocess
+from binaryaudit import run
 from xml.etree import ElementTree
 import glob
-import os
 from binaryaudit import util
 
 
@@ -65,8 +67,14 @@ def serialize_artifacts(adir, id):
     '''
     for fn in glob.iglob(id + "/**/**", recursive=True):
         if os.path.isfile(fn) and not os.path.islink(fn):
-            if not is_elf(fn):
+            is_elf_artifact = False
+            try:
+                is_elf_artifact = is_elf(fn)
+            except Exception as e:
+                util.warn(str(e))
+            if not is_elf_artifact:
                 continue
+
             # If there's no error, out is the XML representation
             ret, out, cmd = serialize(fn)
             util.note(" ".join(cmd))
@@ -112,6 +120,15 @@ def diff_is_incompatible_change(c):
 
 
 def diff_get_bits(c):
+    ''' Circle through the return value bits
+
+        Parameters:
+            c (int) - Return value to parse.
+
+        Returns:
+            Array with the text representations of bits.
+
+    '''
     a = []
     if diff_is_ok(c):
         a.append("OK")
@@ -124,4 +141,54 @@ def diff_get_bits(c):
     if diff_is_incompatible_change(c):
         a.append("INCOMPATIBLE_CHANGE")
 
+    if 0 == len(a):
+        raise ValueError("Value '{}' can't be interpreted as a libabigail return status.".format(c))
+
     return a
+
+
+def diff_get_bit(c):
+    ''' Circle through the return value bits.
+
+        Parameters:
+            c (int) - Return value to parse.
+
+        Returns:
+            The text representation for the most relevant bit.
+    '''
+
+    # Order matters.
+    if diff_is_ok(c):
+        return "OK"
+    if diff_is_usage_error(c):
+        return "USAGE_ERROR"
+    if diff_is_error(c):
+        return "ERROR"
+    if diff_is_incompatible_change(c):
+        return "INCOMPATIBLE_CHANGE"
+    if diff_is_change(c):
+        return "CHANGE"
+
+    raise ValueError("Value '{}' can't be interpreted as a libabigail return status.".format(c))
+
+
+def generate_package_json(source_dir, out_filename):
+    ''' Gets input directory of RPMs, groups packages based on source RPM, and outputs to JSON file.
+
+        Parameters:
+            source_dir (str): The path to the input directory.
+            out_filename (str): The name of the output JSON file
+    '''
+    rpm_dict = {}
+    for filename in os.listdir(source_dir):
+        f = os.path.join(source_dir, filename)
+        if os.path.isfile(f):
+            if f.endswith(".rpm"):
+                proc, proc_exit_code = run.run_command(["rpm", "-qpi", f], None, subprocess.PIPE)
+                grep, grep_exit_code = run.run_command(["grep", "Source RPM"], proc.stdout, subprocess.PIPE)
+                source = grep.stdout.read()
+                source = source.replace(b"Source RPM  : ", b"")
+                source = source.replace(b"\n", b"")
+                rpm_dict.setdefault(source.decode('utf-8'), []).append(filename)
+    with open(out_filename, "w") as outputFile:
+        json.dump(rpm_dict, outputFile, indent=2)
