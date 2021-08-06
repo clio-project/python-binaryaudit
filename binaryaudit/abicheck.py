@@ -225,7 +225,7 @@ def generate_package_json(source_dir, out_filename):
     filter_patterns = conf.get_config("Mariner", "rpms_filter_patterns")
     filter_list = filter_patterns.split(',')
     rpm_dict = {}
-    for filename in os.listdir(source_dir):
+    for filename in sorted(os.listdir(source_dir)):
         f = os.path.join(source_dir, filename)
         if os.path.isfile(f):
             if f.endswith(".rpm"):
@@ -253,5 +253,5 @@ def generate_package_json(source_dir, out_filename):
         if debug_devel_only == True:
             util.note("Dropping files with " + key + " source name because there are only debuginfo and/or devel files")
             del rpm_dict[key]
-    with open(out_filename, "w") as outputFile:
-        json.dump(rpm_dict, outputFile, indent=2)
+    with open(out_filename, "w") as output_file:
+        json.dump(rpm_dict, output_file, indent=2)

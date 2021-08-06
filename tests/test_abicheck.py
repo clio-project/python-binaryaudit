@@ -1,6 +1,10 @@
 
+import json
+import sys
 import unittest
 import os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from binaryaudit import abicheck
 
 data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
@@ -54,3 +58,12 @@ class AbicheckTestSuite(unittest.TestCase):
         expected_out = open(os.path.join(data_dir, 'test_compare_with_suppress_expected')).read()
         assert code == 0
         assert out == expected_out
+
+    def test_generate_json_packages(self):
+        source_dir = os.path.join(data_dir, "generate_package_json_test")
+        output_file = os.path.join(data_dir, "generate_package_json_test_out")
+        abicheck.generate_package_json(source_dir, output_file)
+        with open(output_file, "r") as json_file:
+            data = json.load(json_file)
+        assert len(data) == 1
+        os.remove(output_file)
