@@ -87,11 +87,13 @@ elif "poky" == args.cmd:
             util.error(str(e))
 
     if args.compare_buildhistory:
-        suppr = []  # TODO add suppression option
+        suppr = []
+        if args.global_suppression is not None:
+            suppr.append(args.global_suppression)
         d1 = args.buildhistory_baseline
         d2 = args.buildhistory_current
 
-        if not os.path.isdir(d1) and not 'y' == args.enable_telemetry:
+        if not 'y' == args.enable_telemetry and not os.path.isdir(d1):
                 util.warn("Directory '{}' doesn't exist.".format(d1))
                 sys.exit(1)
         # Either need the baseline directory passed or telemetry enabled
