@@ -139,3 +139,18 @@ elif "poky" == args.cmd:
             if abicheck.DIFF_OK != build_ret_acc:
                 build_result = TRANSACTION_MAIN_RESULT_FAILED
             db_conn.update_ba_test_result(args.build_id, build_result)
+    elif args.insert_baseline:
+        if not 'n' == args.enable_telemetry:
+            # Another way would be to implicitly enable telemetry
+            util.error("Telemetry is not anabled")
+            sys.exit(1)
+
+        product_id = db_conn.get_product_id(args.product_name, args.derivative)
+
+        db_conn.insert_main_transaction(args.build_id, product_id, args.buildurl, args.logurl, TRANSACTION_MAIN_RESULT_PASSED)
+
+        data = None
+        with open(args.insert_baseline, "rb") as f:
+            data = f.read()
+            f.close
+        db_conn.insert_ba_baseline_data(args.build_id, product_id, data)

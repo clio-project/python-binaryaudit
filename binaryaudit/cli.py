@@ -65,6 +65,8 @@ arg_parser_db_cmd.add_argument('--check-connection', action='store_true', requir
 arg_parser_poky = arg_parser_subs.add_parser("poky", help="RPM tools frontend.",
                                              parents=[arg_parser_common, arg_parser_db, arg_parser_telemetry])
 arg_parser_poky.add_argument("--compare-buildhistory", action="store_true", help="Run abicompat on two buildhistory dirs.")
+arg_parser_poky.add_argument('--insert-baseline', action='store', required=False,
+                             help="Insert baseline data into DB.")
 arg_parser_poky.add_argument("--buildhistory-baseline", action="store", help="Baseline buildhistory directory.")
 arg_parser_poky.add_argument("--buildhistory-current", action="store",
                              help="Current buildhistory directory to be compared against the baseline.")
