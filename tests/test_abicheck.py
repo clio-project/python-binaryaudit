@@ -5,7 +5,7 @@ import unittest
 import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from binaryaudit import abicheck
+from binaryaudit import abicheck  # noqa: E402
 
 data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 

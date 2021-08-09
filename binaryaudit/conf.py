@@ -1,5 +1,7 @@
 import configparser
-config=None
+config = None
+
+
 def parse_config():
     ''' Parses the configuration file
     '''
@@ -7,8 +9,9 @@ def parse_config():
     config = configparser.ConfigParser()
     config.read('../conf/binaryaudit.conf')
 
-def get_config (section, key):
+
+def get_config(section, key):
     global config
-    if config == None:
+    if config is None:
         parse_config()
     return config[section][key]

@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import urllib.request
 
+
 def process_downloads(source_dir, new_json_file, old_json_file, output_dir, cleanup=True):
     ''' Finds and downloads older versions of RPMs.
 
@@ -26,7 +27,7 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir, clea
         for key, values in data.items():
             for value in values:
                 with rpmfile.open(source_dir + value) as rpm:
-                    name = rpm.headers.get("name") 
+                    name = rpm.headers.get("name")
                 old_rpm_name = download(key, source_dir, name, old_rpm_dict)
             if old_rpm_name == "":
                 continue
@@ -34,13 +35,16 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir, clea
                 json.dump(old_rpm_dict, outputFile, indent=2)
             generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir, cleanup)
     finally:
-        if cleanup == True:
+        if cleanup is True:
             try:
                 shutil.rmtree(source_dir + "old")
                 os.remove(new_json_file)
                 os.remove(old_json_file)
-            except:
+                os.remove("output_file")
+            except OSError:
                 pass
+
+
 def download(key, source_dir, name, old_rpm_dict):
     ''' Finds and downloads older versions of RPMs.
 
@@ -50,17 +54,20 @@ def download(key, source_dir, name, old_rpm_dict):
             name: The name of the RPM
             old_rpm_dict: The dictionary containing the older set of packages
     '''
-    docker, docker_exit_code = run.run_command_docker(["/usr/bin/dnf", "repoquery", "--quiet", "--latest-limit=1", name], None, subprocess.PIPE)
+    docker, docker_exit_code = run.run_command_docker(["/usr/bin/dnf", "repoquery", "--quiet", "--latest-limit=1", name],
+                                                      None, subprocess.PIPE)
     old_rpm_name = docker.stdout.read().decode('utf-8')
     if old_rpm_name == "":
         return old_rpm_name
     old_rpm_name = old_rpm_name.replace("\r\n", "")
-    docker_loc, docker_loc_exit_code = run.run_command_docker(["/usr/bin/dnf", "repoquery", "--quiet",  "--location", "--latest-limit=1", name], None, subprocess.PIPE)
+    docker_loc, docker_loc_exit_code = run.run_command_docker(["/usr/bin/dnf", "repoquery", "--quiet",
+                                                              "--location", "--latest-limit=1", name], None, subprocess.PIPE)
     url = docker_loc.stdout.read().decode('utf-8')
     util.debug("url: {}".format(url))
     urllib.request.urlretrieve(url, source_dir + "old/" + old_rpm_name)
     old_rpm_dict.setdefault(key, []).append(old_rpm_name)
     return old_rpm_name
+
 
 def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir, cleanup=True):
     ''' Runs abipkgdiff against the grouped packages.
@@ -69,7 +76,7 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
             key (str): The source name for the group of RPMs
             source_dir (str): The path to the input directory of RPMs
             new_json_file (str): The name of the JSON file containing the newer set of packages
-            old_json_file (str): The name of the JSON file containing the olderr set of packages
+            old_json_file (str): The name of the JSON file containing the older set of packages
             output_dir (str): The path to the output directory of abipkgdiff
 
     '''
@@ -81,34 +88,15 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
         new_data = json.load(new_file)
     with open(old_json_file, "r") as old_file:
         old_data = json.load(old_file)
-    cmd_supporting_args = []
-    rpms_with_so = []
-    count = -1
-    for value in old_data[key]:
-        count += 1
-        if "-debuginfo-" in value:
-            cmd_supporting_args.append("--d1")
-            cmd_supporting_args.append(source_dir + "old/" + value)
-            cmd_supporting_args.append("--d2")
-            cmd_supporting_args.append(source_dir + new_data[key][count])
-        elif "-devel-" in value:
-            cmd_supporting_args.append("--devel1")
-            cmd_supporting_args.append(source_dir + "old/" + value)
-            cmd_supporting_args.append("--devel2")
-            cmd_supporting_args.append(source_dir + new_data[key][count])
-        else:
-            old_main_rpm = source_dir + "old/" + value
-            new_main_rpm = source_dir + new_data[key][count]
-            rpms_with_so.append(source_dir + "old/" + value)
-            rpms_with_so.append(source_dir + new_data[key][count])
+    rpms_with_so, cmd_supporting_args = sortRPMs(key, source_dir, new_data, old_data)
     i = 0
     for rpm in rpms_with_so:
-        if i%2 == 0:
+        if i % 2 == 0:
             command_list = ["abipkgdiff", "--suppressions", "../conf/suppressions.conf"]
             old_main_rpm = rpm
         i += 1
         command_list.append(rpm)
-        if i%2 == 1:
+        if i % 2 == 1:
             continue
         new_main_rpm = rpm
         for arg in cmd_supporting_args:
@@ -123,10 +111,45 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
                 with rpmfile.open(new_main_rpm) as rpm:
                     new_version = rpm.headers.get('version').decode('utf-8')
                     new_release = rpm.headers.get('release').decode('utf-8')
-                print("Incompatibility found between " + name + "-" + old_version + "-" + old_release + " and " + name + "-" + new_version + "-" + new_release)
+                print("Incompatibility found between " + name + "-" + old_version + "-" + old_release
+                      + " and " + name + "-" + new_version + "-" + new_release)
                 fileName = name + "__" + old_version + "-" + old_release + "__" + new_version + "-" + new_release + ".abidiff"
                 os.rename("output_file", output_dir + fileName)
-    if cleanup == True:
+    if cleanup is True:
         for value in old_data[key]:
             os.remove(source_dir + "old/" + value)
-    output_file.close()
+
+
+def sortRPMs(key, source_dir, new_data, old_data):
+    ''' Sorts the RPMs depnding on whether or not they have
+        "debuginfo" or "devel" in their name.
+
+        Parameters:
+            key (str): The source name for the group of RPMs
+            source_dir (str): The path to the input directory of RPMs
+            new_data (dict): The dictionary containing the newer set of packages
+            old_data (dict): The dictionary containing the older set of packages
+
+    Returns:
+            rpms_with_so (list): The list of RPMs not containing "debuginfo" or "devel" in their name
+            cmd_supporting_args (list): The list of RPMs containing "debuginfo" or "devel" in their name
+    '''
+    rpms_with_so = []
+    cmd_supporting_args = []
+    count = -1
+    for value in old_data[key]:
+        count += 1
+        if "-debuginfo-" in value:
+            cmd_supporting_args.append("--d1")
+            cmd_supporting_args.append(source_dir + "old/" + value)
+            cmd_supporting_args.append("--d2")
+            cmd_supporting_args.append(source_dir + new_data[key][count])
+        elif "-devel-" in value:
+            cmd_supporting_args.append("--devel1")
+            cmd_supporting_args.append(source_dir + "old/" + value)
+            cmd_supporting_args.append("--devel2")
+            cmd_supporting_args.append(source_dir + new_data[key][count])
+        else:
+            rpms_with_so.append(source_dir + "old/" + value)
+            rpms_with_so.append(source_dir + new_data[key][count])
+    return rpms_with_so, cmd_supporting_args

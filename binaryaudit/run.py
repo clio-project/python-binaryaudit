@@ -2,6 +2,7 @@ from binaryaudit import conf
 from binaryaudit import util
 import subprocess
 
+
 def run_command(cmd, input, output):
     ''' Runs command and gets output.
 
@@ -19,6 +20,7 @@ def run_command(cmd, input, output):
     util.debug("command: {}".format(cmd))
     util.debug("exit_code: {}".format(exit_code))
     return popen_output, exit_code
+
 
 def run_command_docker(cmd, input, output):
     ''' Runs command in docker container and gets output.
