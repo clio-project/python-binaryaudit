@@ -1,4 +1,3 @@
-
 import json
 import os
 import subprocess
@@ -23,8 +22,7 @@ def get_soname_from_xml(xml):
         return ""
 
 
-def serialize(fn):
-    cmd = ["abidw", "--no-corpus-path", fn]
+def _serialize(cmd):
     sout = subprocess.PIPE
     serr = subprocess.STDOUT
     shell = False
@@ -35,8 +33,37 @@ def serialize(fn):
         out = "".join([out.decode('utf-8') for out in [sout, serr] if out])
     except OSError:
         raise
-    # return cmd for logging purposes
-    return process.returncode, out, cmd
+    return process.returncode, out
+
+
+def serialize(fn):
+    cmd = ["abidw", "--no-corpus-path", fn]
+    status, out = _serialize(cmd)
+    return status, out, cmd
+
+
+def serialize_kernel_artifacts(abixml_dir, tree, vmlinux=None, whitelist=None):
+    cmd = ["abidw", "--no-corpus-path"]
+    cmd.extend(["--linux-tree", tree])
+    if vmlinux:
+        cmd.extend(["--vmlinux", vmlinux])
+    if whitelist:
+        cmd.extend(["--kmi-whitelist", whitelist])
+
+    util.note(" ".join(cmd))
+    ret, out = _serialize(cmd)
+    if not 0 == ret:
+        util.error(out)
+        return out, None
+    if not out:
+        util.warn("Empty dump output for '{}'".format(tree))
+        return None, None
+
+    sn = get_soname_from_xml(out)
+
+    out_fn = util.create_path_to_xml(sn, abixml_dir, tree)
+
+    return out, out_fn
 
 
 def compare(ref, cur, suppr=[]):
