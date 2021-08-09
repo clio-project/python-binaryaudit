@@ -67,6 +67,7 @@ elif "db" == args.cmd:
         else:
             util.note("Connection unsuccessful")
             sys.exit(1)
+
 elif "poky" == args.cmd:
     from binaryaudit import poky
     from binaryaudit.db import TRANSACTION_MAIN_RESULT_FAILED, TRANSACTION_MAIN_RESULT_PASSED, TRANSACTION_MAIN_RESULT_PENDING
@@ -134,7 +135,7 @@ elif "poky" == args.cmd:
             if 'y' == args.enable_telemetry:
                 db_conn.insert_ba_transaction_details(args.build_id, item_name, base_version, new_version, exec_time, result, res_details)
 
-    if 'y' == args.enable_telemetry:
-        if abicheck.DIFF_OK != build_ret_acc:
-            build_result = TRANSACTION_MAIN_RESULT_FAILED
-        db_conn.update_ba_test_result(args.build_id, build_result)
+        if 'y' == args.enable_telemetry:
+            if abicheck.DIFF_OK != build_ret_acc:
+                build_result = TRANSACTION_MAIN_RESULT_FAILED
+            db_conn.update_ba_test_result(args.build_id, build_result)
