@@ -6,6 +6,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from binaryaudit import dnf  # noqa: E402
 
 data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+conf_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../conf")
 
 
 class dnfTestSuite(unittest.TestCase):
@@ -20,8 +21,8 @@ class dnfTestSuite(unittest.TestCase):
     def test_generate_abidiffs_output(self):
         new_json_file = os.path.join(data_dir, 'new.json')
         old_json_file = os.path.join(data_dir, 'old.json')
-        dnf.generate_abidiffs("Cython-0.29.13-6.cm1.src.rpm", "data/", new_json_file,
-                              old_json_file, "data/output_abidiffs/", False)
+        dnf.generate_abidiffs("Cython-0.29.13-6.cm1.src.rpm", data_dir + "/", new_json_file,
+                              old_json_file, data_dir + "/output_abidiffs/", conf_dir, False)
         with open(os.path.join(data_dir, 'output_abidiffs/python3-Cython__0.28.5-8.cm1__0.29.13-6.cm1.abidiff')) as f:
             out = f.read()
         os.remove(os.path.join(data_dir, 'output_abidiffs/python3-Cython__0.28.5-8.cm1__0.29.13-6.cm1.abidiff'))

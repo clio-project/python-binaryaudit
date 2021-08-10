@@ -19,6 +19,7 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir, clea
             output_dir (str): The path to the output directory of abipkgdiff
     '''
     try:
+        conf_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "conf")
         if not os.path.exists(source_dir + "old"):
             os.mkdir(source_dir + "old")
         old_rpm_dict = {}
@@ -33,7 +34,7 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir, clea
                 continue
             with open(old_json_file, "w") as outputFile:
                 json.dump(old_rpm_dict, outputFile, indent=2)
-            generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir, cleanup)
+            generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir, conf_dir, cleanup)
     finally:
         if cleanup is True:
             try:
@@ -69,7 +70,7 @@ def download(key, source_dir, name, old_rpm_dict):
     return old_rpm_name
 
 
-def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir, cleanup=True):
+def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir, conf_dir, cleanup=True):
     ''' Runs abipkgdiff against the grouped packages.
 
         Parameters:
@@ -78,6 +79,8 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
             new_json_file (str): The name of the JSON file containing the newer set of packages
             old_json_file (str): The name of the JSON file containing the older set of packages
             output_dir (str): The path to the output directory of abipkgdiff
+            conf_dir (str): The absolute path to the conf directory
+            cleanup (bool): An option to remove temporary files and directories after running
 
     '''
     # new_... handles the newer set of packages
@@ -92,7 +95,7 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
     i = 0
     for rpm in rpms_with_so:
         if i % 2 == 0:
-            command_list = ["abipkgdiff", "--suppressions", "../conf/suppressions.conf"]
+            command_list = ["abipkgdiff", "--suppressions", conf_dir + "/suppressions.conf"]
             old_main_rpm = rpm
         i += 1
         command_list.append(rpm)
