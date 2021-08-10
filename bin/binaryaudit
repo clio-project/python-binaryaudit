@@ -133,7 +133,7 @@ elif "poky" == args.cmd:
             util.debug("item: '{}', base: '{}', new: '{}', duration: '{}', res: '{}'".format(item_name, base_version, new_version, exec_time, result))
 
             if 'y' == args.enable_telemetry:
-                db_conn.insert_ba_transaction_details(args.build_id, item_name, base_version, new_version, exec_time, result, res_details)
+                db_conn.insert_ba_transaction_details(args.build_id, prod_id, item_name, base_version, new_version, exec_time, result, res_details)
 
         if 'y' == args.enable_telemetry:
             if abicheck.DIFF_OK != build_ret_acc:
