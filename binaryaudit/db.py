@@ -168,6 +168,7 @@ class wrapper:
 
     def insert_ba_transaction_details(self,
                                       build_id,
+                                      product_id,
                                       item_name,
                                       base_version,
                                       new_version,
@@ -182,6 +183,7 @@ class wrapper:
         new_tbl_entry = self.binaryaudit_abi_checker_transaction_details_tbl(
                         DateTimeUTC=date,
                         BuildID=build_id,
+                        ProductID=product_id,
                         ItemName=item_name,
                         BaseVersion=base_version,
                         NewVersion=new_version,
