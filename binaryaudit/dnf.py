@@ -40,7 +40,7 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir, clea
                 json.dump(old_rpm_dict, outputFile, indent=2)
 
             ret_status = generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir, conf_dir, cleanup)
-            if ret_status is "fail":
+            if ret_status == "fail":
                 overall_status = "fail"
     finally:
         if cleanup is True:
