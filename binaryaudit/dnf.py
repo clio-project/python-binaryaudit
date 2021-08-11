@@ -17,6 +17,7 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir, clea
             new_json_file (str): The name of the JSON file containing the newer set of packages after so based filtering
             old_json_file (str): The name of the JSON file containing the older set of packages
             output_dir (str): The path to the output directory of abipkgdiff
+
         Returns:
             overall_status (str): Returns "fail" if an incompatibility is found in at least 1 RPM, otherwise returns "pass"
     '''
@@ -37,6 +38,7 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir, clea
                 continue
             with open(old_json_file, "w") as outputFile:
                 json.dump(old_rpm_dict, outputFile, indent=2)
+
             ret_status = generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir, conf_dir, cleanup)
             if ret_status is "fail":
                 overall_status = "fail"
@@ -87,6 +89,7 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
             output_dir (str): The path to the output directory of abipkgdiff
             conf_dir (str): The absolute path to the conf directory
             cleanup (bool): An option to remove temporary files and directories after running
+
 
         Returns:
             status (str): Returns "fail" if an incompatibility found, otherwise returns "pass"

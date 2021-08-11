@@ -63,6 +63,7 @@ arg_parser_db_cmd.add_argument('--check-connection', action='store_true', requir
 # binaryaudit mariner
 arg_parser_mariner = arg_parser_subs.add_parser("mariner", help="Mariner Abipkgdiff Wrapper.",
                                                 parents=[arg_parser_common, arg_parser_db, arg_parser_telemetry])
+
 required_args = arg_parser_mariner.add_argument_group('mandatory arguments')
 required_args.add_argument('-i', '--source-dir', action='store', required=True,
                            help="Path to local dir with new rpms.")
