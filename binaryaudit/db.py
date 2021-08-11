@@ -201,7 +201,7 @@ class wrapper:
         updates the object's Result entity with test outcome
         '''
         session = self._acquire_session()
-        entry = session.query(self.binaryaudit_transaction_main_tbl).get(build_id, product_id)
+        entry = session.query(self.binaryaudit_transaction_main_tbl).get((build_id, product_id))
         entry.Result = result
         self._flush_session(session)
 
