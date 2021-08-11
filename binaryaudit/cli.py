@@ -77,7 +77,7 @@ arg_parser_poky.add_argument('--insert-baseline', action='store', required=False
 arg_parser_poky.add_argument("--buildhistory-baseline", action="store", help="Baseline buildhistory directory.")
 arg_parser_poky.add_argument("--buildhistory-current", action="store",
                              help="Current buildhistory directory to be compared against the baseline.")
-
+arg_parser_poky.add_argument("--global-suppression", action="store", help="Path to suppression file")
 
 # ##### functions #####
 
