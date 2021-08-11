@@ -1,7 +1,10 @@
+
 import json
 import os
+import rpmfile
 import subprocess
-from binaryaudit import run
+
+from binaryaudit import conf
 from xml.etree import ElementTree
 import glob
 from binaryaudit import util
@@ -174,6 +177,30 @@ def diff_get_bits(c):
     return a
 
 
+def filter_rpm(filename, filter_list, rpm):
+    ''' Filters out packages with specified words in name and packages not conatining a .so file.
+
+        Paramters:
+            filename (str): The name of the RPM file
+            filter_list (array): The list of filter words
+            rpm: The current RPM
+    '''
+    if any(word in filename for word in filter_list):
+        util.note("Dropping " + filename + " because it contains a filter word")
+        return True
+    elif "-debuginfo-" not in filename and "-devel-" not in filename:
+        has_so = False
+        for member in rpm.getmembers():
+            member_name = str(member)
+            if ".so" in member_name:
+                has_so = True
+                break
+        if has_so is False:
+            util.note("Dropping " + filename + " RPM because it has no shared object file")
+            return True
+    return False
+
+
 def diff_get_bit(c):
     ''' Circle through the return value bits.
 
@@ -200,22 +227,32 @@ def diff_get_bit(c):
 
 
 def generate_package_json(source_dir, out_filename):
-    ''' Gets input directory of RPMs, groups packages based on source RPM, and outputs to JSON file.
+    ''' Gets input directory of RPMs, filters out unwanted packages, groups packages based on source RPM, and outputs to JSON file.
 
         Parameters:
             source_dir (str): The path to the input directory.
             out_filename (str): The name of the output JSON file
     '''
+    filter_patterns = conf.get_config("Mariner", "rpms_filter_patterns")
+    filter_list = filter_patterns.split(',')
     rpm_dict = {}
-    for filename in os.listdir(source_dir):
+    for filename in sorted(os.listdir(source_dir)):
         f = os.path.join(source_dir, filename)
         if os.path.isfile(f):
             if f.endswith(".rpm"):
-                proc, proc_exit_code = run.run_command(["rpm", "-qpi", f], None, subprocess.PIPE)
-                grep, grep_exit_code = run.run_command(["grep", "Source RPM"], proc.stdout, subprocess.PIPE)
-                source = grep.stdout.read()
-                source = source.replace(b"Source RPM  : ", b"")
-                source = source.replace(b"\n", b"")
+                with rpmfile.open(f) as rpm:
+                    source = rpm.headers.get("sourcerpm")
+                    if filter_rpm(filename, filter_list, rpm) is True:
+                        continue
                 rpm_dict.setdefault(source.decode('utf-8'), []).append(filename)
-    with open(out_filename, "w") as outputFile:
-        json.dump(rpm_dict, outputFile, indent=2)
+    for key, value in list(rpm_dict.items()):
+        debug_devel_only = True
+        for values in value:
+            if "-debuginfo-" not in values and "-devel-" not in values:
+                debug_devel_only = False
+                break
+        if debug_devel_only is True:
+            util.note("Dropping files with " + key + " source name because there are only debuginfo and/or devel files")
+            del rpm_dict[key]
+    with open(out_filename, "w") as output_file:
+        json.dump(rpm_dict, output_file, indent=2)
