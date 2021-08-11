@@ -17,9 +17,13 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir, clea
             new_json_file (str): The name of the JSON file containing the newer set of packages after so based filtering
             old_json_file (str): The name of the JSON file containing the older set of packages
             output_dir (str): The path to the output directory of abipkgdiff
+
+        Returns:
+            overall_status (str): Returns "fail" if an incompatibility is found in at least 1 RPM, otherwise returns "pass"
     '''
     try:
-        conf_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "conf")
+        overall_status = "pass"
+        conf_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../conf")
         if not os.path.exists(source_dir + "old"):
             os.mkdir(source_dir + "old")
         old_rpm_dict = {}
@@ -34,7 +38,10 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir, clea
                 continue
             with open(old_json_file, "w") as outputFile:
                 json.dump(old_rpm_dict, outputFile, indent=2)
-            generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir, conf_dir, cleanup)
+
+            ret_status = generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir, conf_dir, cleanup)
+            if ret_status == "fail":
+                overall_status = "fail"
     finally:
         if cleanup is True:
             try:
@@ -44,6 +51,7 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir, clea
                 os.remove("output_file")
             except OSError:
                 pass
+        return overall_status
 
 
 def download(key, source_dir, name, old_rpm_dict):
@@ -82,9 +90,13 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
             conf_dir (str): The absolute path to the conf directory
             cleanup (bool): An option to remove temporary files and directories after running
 
+
+        Returns:
+            status (str): Returns "fail" if an incompatibility found, otherwise returns "pass"
     '''
     # new_... handles the newer set of packages
     # old_... handles the older set of packages
+    status = "pass"
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
     with open(new_json_file, "r") as new_file:
@@ -118,9 +130,12 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
                       + " and " + name + "-" + new_version + "-" + new_release)
                 fileName = name + "__" + old_version + "-" + old_release + "__" + new_version + "-" + new_release + ".abidiff"
                 os.rename("output_file", output_dir + fileName)
+                status = "fail"
+                # insert into db
     if cleanup is True:
         for value in old_data[key]:
             os.remove(source_dir + "old/" + value)
+    return status
 
 
 def sortRPMs(key, source_dir, new_data, old_data):

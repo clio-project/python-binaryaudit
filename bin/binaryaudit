@@ -159,11 +159,18 @@ elif "poky" == args.cmd:
             data = f.read()
             f.close
         db_conn.insert_ba_baseline_data(args.build_id, product_id, data)
+
 elif "mariner" == args.cmd:
-    new_json_file = conf.get_config("Mariner", "new_json_file_name")
-    old_json_file = conf.get_config("Mariner", "old_json_file_name")
-    abicheck.generate_package_json(args.source_dir, new_json_file)
-    dnf.process_downloads(args.source_dir, new_json_file, old_json_file, args.output_dir)
+    mariner_binaryaudit = orchestrator(
+        args.product_name,
+        args.derivative,
+        args.build_id,
+        args.enable_telemetry,
+        util.logger,
+        args.db_config
+    )
+    mariner_binaryaudit.get_product_id()
+    mariner_binaryaudit.perform_binary_audit(args.buildurl, args.logurl, args.source_dir, args.output_dir)
 
 else:
     # This should be caught by argparse anyway
