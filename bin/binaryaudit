@@ -141,7 +141,7 @@ elif "poky" == args.cmd:
         if 'y' == args.enable_telemetry:
             if abicheck.DIFF_OK != build_ret_acc:
                 build_result = TRANSACTION_MAIN_RESULT_FAILED
-            db_conn.update_ba_test_result(args.build_id, build_result)
+            db_conn.update_ba_test_result(args.build_id, prod_id, build_result)
     elif args.insert_baseline:
         if not 'n' == args.enable_telemetry:
             # Another way would be to implicitly enable telemetry

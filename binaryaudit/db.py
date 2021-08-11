@@ -195,13 +195,13 @@ class wrapper:
         session.add(new_tbl_entry)
         self._flush_session(session)
 
-    def update_ba_test_result(self, build_id, result) -> None:
+    def update_ba_test_result(self, build_id, product_id, result) -> None:
         '''
         locates object with corresponding Build ID in the [main table]
         updates the object's Result entity with test outcome
         '''
         session = self._acquire_session()
-        entry = session.query(self.binaryaudit_transaction_main_tbl).get(build_id)
+        entry = session.query(self.binaryaudit_transaction_main_tbl).get(build_id, product_id)
         entry.Result = result
         self._flush_session(session)
 
