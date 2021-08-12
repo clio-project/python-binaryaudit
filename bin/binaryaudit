@@ -91,11 +91,13 @@ elif "poky" == args.cmd:
             util.error(str(e))
 
     if args.compare_buildhistory:
-        suppr = []  # TODO add suppression option
+        suppr = []
+        if args.global_suppression is not None:
+            suppr.append(args.global_suppression)
         d1 = args.buildhistory_baseline
         d2 = args.buildhistory_current
 
-        if not os.path.isdir(d1) and not 'y' == args.enable_telemetry:
+        if not 'y' == args.enable_telemetry and not os.path.isdir(d1):
                 util.warn("Directory '{}' doesn't exist.".format(d1))
                 sys.exit(1)
         # Either need the baseline directory passed or telemetry enabled
@@ -141,7 +143,7 @@ elif "poky" == args.cmd:
         if 'y' == args.enable_telemetry:
             if abicheck.DIFF_OK != build_ret_acc:
                 build_result = TRANSACTION_MAIN_RESULT_FAILED
-            db_conn.update_ba_test_result(args.build_id, build_result)
+            db_conn.update_ba_test_result(args.build_id, prod_id, build_result)
     elif args.insert_baseline:
         if not 'n' == args.enable_telemetry:
             # Another way would be to implicitly enable telemetry

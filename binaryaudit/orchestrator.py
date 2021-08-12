@@ -52,9 +52,10 @@ class ba_orchestrator:
                     self.product_id,
                     buildurl,
                     logurl
-            )
+             )
         else:
             self.logger.debug("Not connected")
+
         # call mariner model
         mariner_binary_audit(source_dir, output_dir, self.build_id, self.product_id, self.db_conn)
         # wait for test result

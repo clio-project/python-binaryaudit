@@ -21,6 +21,7 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir, buil
             build_id (str): The build id
             product_id (str): The product id
             db_conn: The db connection
+
         Returns:
             overall_status (str): Returns "fail" if an incompatibility is found in at least 1 RPM, otherwise returns "pass"
     '''
@@ -44,6 +45,7 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir, buil
             ret_status = generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
                                            conf_dir, build_id, product_id, db_conn, cleanup)
             util.note("Status: " + ret_status)
+
             if ret_status == "fail":
                 overall_status = "fail"
     finally:
@@ -146,6 +148,7 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
                 with open(output_dir + fileName) as f:
                     out = f.read()
         insert_db(db_conn, build_id, product_id, name, old_VR, new_VR, exec_time, status, out)
+
     if cleanup is True:
         for value in old_data[key]:
             os.remove(source_dir + "old/" + value)
