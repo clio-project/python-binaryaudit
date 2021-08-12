@@ -6,6 +6,7 @@ import subprocess
 import time
 import urllib.request
 
+from binaryaudit import abicheck
 from binaryaudit import run
 from binaryaudit import util
 
@@ -45,8 +46,7 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir, buil
             ret_status = generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
                                            conf_dir, build_id, product_id, db_conn, cleanup)
             util.note("Status: " + ret_status)
-
-            if ret_status == "fail":
+            if ret_status == "INCOMPATIBLE_CHANGE":
                 overall_status = "fail"
     finally:
         if cleanup is True:
@@ -106,7 +106,6 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
     '''
     # new_... handles the newer set of packages
     # old_... handles the older set of packages
-    status = "pass"
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
     with open(new_json_file, "r") as new_file:
@@ -141,12 +140,12 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
             new_VR = new_version + "-" + new_release
             out = ""
             if abipkgdiff_exit_code != 0:
-                print("Incompatibility found between " + name + "-" + old_VR + " and " + name + "-" + new_VR)
-                status = "fail"
+                util.note("Incompatibility found between " + name + "-" + old_VR + " and " + name + "-" + new_VR)
                 fileName = name + "__" + old_VR + "__" + new_VR + ".abidiff"
                 os.rename("output_file", output_dir + fileName)
                 with open(output_dir + fileName) as f:
                     out = f.read()
+        status = abicheck.diff_get_bit(abipkgdiff_exit_code)
         insert_db(db_conn, build_id, product_id, name, old_VR, new_VR, exec_time, status, out)
 
     if cleanup is True:
