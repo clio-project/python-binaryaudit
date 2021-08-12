@@ -14,6 +14,7 @@ setup(name="binaryaudit",
         "pyodbc",
         "envparse",
         "python-dateutil",
+        "rpmfile"
       ],
       scripts=[
         "bin/binaryaudit",

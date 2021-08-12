@@ -168,6 +168,7 @@ class wrapper:
 
     def insert_ba_transaction_details(self,
                                       build_id,
+                                      product_id,
                                       item_name,
                                       base_version,
                                       new_version,
@@ -182,6 +183,7 @@ class wrapper:
         new_tbl_entry = self.binaryaudit_abi_checker_transaction_details_tbl(
                         DateTimeUTC=date,
                         BuildID=build_id,
+                        ProductID=product_id,
                         ItemName=item_name,
                         BaseVersion=base_version,
                         NewVersion=new_version,
@@ -193,13 +195,13 @@ class wrapper:
         session.add(new_tbl_entry)
         self._flush_session(session)
 
-    def update_ba_test_result(self, build_id, result) -> None:
+    def update_ba_test_result(self, build_id, product_id, result) -> None:
         '''
         locates object with corresponding Build ID in the [main table]
         updates the object's Result entity with test outcome
         '''
         session = self._acquire_session()
-        entry = session.query(self.binaryaudit_transaction_main_tbl).get(build_id)
+        entry = session.query(self.binaryaudit_transaction_main_tbl).get((build_id, product_id))
         entry.Result = result
         self._flush_session(session)
 

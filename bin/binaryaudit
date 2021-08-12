@@ -10,6 +10,9 @@ from binaryaudit import util
 from binaryaudit import abicheck
 from binaryaudit import cli
 from binaryaudit.orchestrator import ba_orchestrator as orchestrator
+from binaryaudit import conf
+from binaryaudit import dnf
+from binaryaudit.cli import arg_parser, arg_parser_rpm
 
 args = cli.arg_parser.parse_args()
 
@@ -67,9 +70,8 @@ elif "db" == args.cmd:
         else:
             util.note("Connection unsuccessful")
             sys.exit(1)
+
 elif "poky" == args.cmd:
-    import dumper
-    dumper.dump(args)
     from binaryaudit import poky
     from binaryaudit.db import TRANSACTION_MAIN_RESULT_FAILED, TRANSACTION_MAIN_RESULT_PASSED, TRANSACTION_MAIN_RESULT_PENDING
 
@@ -89,11 +91,13 @@ elif "poky" == args.cmd:
             util.error(str(e))
 
     if args.compare_buildhistory:
-        suppr = []  # TODO add suppression option
+        suppr = []
+        if args.global_suppression is not None:
+            suppr.append(args.global_suppression)
         d1 = args.buildhistory_baseline
         d2 = args.buildhistory_current
 
-        if not os.path.isdir(d1) and not 'y' == args.enable_telemetry:
+        if not 'y' == args.enable_telemetry and not os.path.isdir(d1):
                 util.warn("Directory '{}' doesn't exist.".format(d1))
                 sys.exit(1)
         # Either need the baseline directory passed or telemetry enabled
@@ -134,9 +138,40 @@ elif "poky" == args.cmd:
             util.debug("item: '{}', base: '{}', new: '{}', duration: '{}', res: '{}'".format(item_name, base_version, new_version, exec_time, result))
 
             if 'y' == args.enable_telemetry:
-                db_conn.insert_ba_transaction_details(args.build_id, item_name, base_version, new_version, exec_time, result, res_details)
+                db_conn.insert_ba_transaction_details(args.build_id, prod_id, item_name, base_version, new_version, exec_time, result, res_details)
 
-    if 'y' == args.enable_telemetry:
-        if abicheck.DIFF_OK != build_ret_acc:
-            build_result = TRANSACTION_MAIN_RESULT_FAILED
-        db_conn.update_ba_test_result(args.build_id, build_result)
+        if 'y' == args.enable_telemetry:
+            if abicheck.DIFF_OK != build_ret_acc:
+                build_result = TRANSACTION_MAIN_RESULT_FAILED
+            db_conn.update_ba_test_result(args.build_id, prod_id, build_result)
+    elif args.insert_baseline:
+        if not 'n' == args.enable_telemetry:
+            # Another way would be to implicitly enable telemetry
+            util.error("Telemetry is not anabled")
+            sys.exit(1)
+
+        product_id = db_conn.get_product_id(args.product_name, args.derivative)
+
+        db_conn.insert_main_transaction(args.build_id, product_id, args.buildurl, args.logurl, TRANSACTION_MAIN_RESULT_PASSED)
+
+        data = None
+        with open(args.insert_baseline, "rb") as f:
+            data = f.read()
+            f.close
+        db_conn.insert_ba_baseline_data(args.build_id, product_id, data)
+
+elif "mariner" == args.cmd:
+    mariner_binaryaudit = orchestrator(
+        args.product_name,
+        args.derivative,
+        args.build_id,
+        args.enable_telemetry,
+        util.logger,
+        args.db_config
+    )
+    mariner_binaryaudit.get_product_id()
+    mariner_binaryaudit.perform_binary_audit(args.buildurl, args.logurl, args.source_dir, args.output_dir)
+
+else:
+    # This should be caught by argparse anyway
+    raise("Unknown command '{}'".format(args.cmd))

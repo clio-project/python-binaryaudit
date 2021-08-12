@@ -60,15 +60,26 @@ arg_parser_db_cmd = arg_parser_subs.add_parser("db", help="Database CLI wrapper.
 arg_parser_db_cmd.add_argument('--check-connection', action='store_true', required=False,
                                help="Test DB connection. Exit with 0 if connection could be established.")
 
+# binaryaudit mariner
+arg_parser_mariner = arg_parser_subs.add_parser("mariner", help="Mariner Abipkgdiff Wrapper.",
+                                                parents=[arg_parser_common, arg_parser_db, arg_parser_telemetry])
+
+required_args = arg_parser_mariner.add_argument_group('mandatory arguments')
+required_args.add_argument('-i', '--source-dir', action='store', required=True,
+                           help="Path to local dir with new rpms.")
+required_args.add_argument('-o', '--output-dir', action='store', required=True,
+                           help="Path to local dir with output of abipkgdiff.")
 
 # binaryaudit poky ...
 arg_parser_poky = arg_parser_subs.add_parser("poky", help="RPM tools frontend.",
                                              parents=[arg_parser_common, arg_parser_db, arg_parser_telemetry])
 arg_parser_poky.add_argument("--compare-buildhistory", action="store_true", help="Run abicompat on two buildhistory dirs.")
+arg_parser_poky.add_argument('--insert-baseline', action='store', required=False,
+                             help="Insert baseline data into DB.")
 arg_parser_poky.add_argument("--buildhistory-baseline", action="store", help="Baseline buildhistory directory.")
 arg_parser_poky.add_argument("--buildhistory-current", action="store",
                              help="Current buildhistory directory to be compared against the baseline.")
-
+arg_parser_poky.add_argument("--global-suppression", action="store", help="Path to suppression file")
 
 # ##### functions #####
 

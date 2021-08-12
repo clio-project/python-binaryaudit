@@ -6,7 +6,7 @@ Variables changes summary: 0 Removed, 0 Changed, 0 Added variable
   [C]'function void foo(opaque_type*)' at test1-v1.cc:3:1 has some indirect sub-type changes:
     parameter 1 of type 'opaque_type*' has sub-type changes:
       in pointed to type 'struct opaque_type' at test1-v1.cc:6:1:
-        type size changed from 64 to 96 (in bits)
+        type size changed from 64 to 96 bits
         1 data member insertion:
           'char opaque_type::added_member_1', at offset 0 (in bits) at test1-v1.cc:8:1
         2 data member changes:
@@ -16,7 +16,7 @@ Variables changes summary: 0 Removed, 0 Changed, 0 Added variable
   [C]'function void foo(another_type*)' at test1-v1.cc:16:1 has some indirect sub-type changes:
     parameter 1 of type 'another_type*' has sub-type changes:
       in pointed to type 'struct another_type' at test1-v1.cc:19:1:
-        type size changed from 64 to 96 (in bits)
+        type size changed from 64 to 96 bits
         1 data member insertion:
           'char another_type::added_member_2', at offset 0 (in bits) at test1-v1.cc:21:1
         2 data member changes:

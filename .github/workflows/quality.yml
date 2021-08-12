@@ -9,7 +9,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     steps:
     - uses: actions/checkout@v2
@@ -22,6 +22,7 @@ jobs:
         python -m pip install --upgrade pip
         sudo apt install abigail-tools
         pip install flake8 pytest
+        python -m pip install rpmfile
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Lint with flake8
       run: |
