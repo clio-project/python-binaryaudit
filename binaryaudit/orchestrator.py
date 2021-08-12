@@ -57,7 +57,7 @@ class ba_orchestrator:
             self.logger.debug("Not connected")
 
         # call mariner model
-        mariner_binary_audit(source_dir, output_dir)
+        mariner_binary_audit(source_dir, output_dir, self.build_id, self.product_id, self.db_conn)
         # wait for test result
         # model = run_command()
         # result = model.popen_output

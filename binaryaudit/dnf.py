@@ -1,15 +1,16 @@
-from binaryaudit import run
-from binaryaudit import util
-
 import json
 import os
 import rpmfile
 import shutil
 import subprocess
+import time
 import urllib.request
 
+from binaryaudit import run
+from binaryaudit import util
 
-def process_downloads(source_dir, new_json_file, old_json_file, output_dir, cleanup=True):
+
+def process_downloads(source_dir, new_json_file, old_json_file, output_dir, build_id, product_id, db_conn, cleanup=True):
     ''' Finds and downloads older versions of RPMs.
 
         Parameters:
@@ -17,6 +18,9 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir, clea
             new_json_file (str): The name of the JSON file containing the newer set of packages after so based filtering
             old_json_file (str): The name of the JSON file containing the older set of packages
             output_dir (str): The path to the output directory of abipkgdiff
+            build_id (str): The build id
+            product_id (str): The product id
+            db_conn: The db connection
 
         Returns:
             overall_status (str): Returns "fail" if an incompatibility is found in at least 1 RPM, otherwise returns "pass"
@@ -38,8 +42,10 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir, clea
                 continue
             with open(old_json_file, "w") as outputFile:
                 json.dump(old_rpm_dict, outputFile, indent=2)
+            ret_status = generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
+                                           conf_dir, build_id, product_id, db_conn, cleanup)
+            util.note("Status: " + ret_status)
 
-            ret_status = generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir, conf_dir, cleanup)
             if ret_status == "fail":
                 overall_status = "fail"
     finally:
@@ -78,7 +84,8 @@ def download(key, source_dir, name, old_rpm_dict):
     return old_rpm_name
 
 
-def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir, conf_dir, cleanup=True):
+def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
+                      conf_dir, build_id, product_id, db_conn, cleanup=True):
     ''' Runs abipkgdiff against the grouped packages.
 
         Parameters:
@@ -88,6 +95,9 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
             old_json_file (str): The name of the JSON file containing the older set of packages
             output_dir (str): The path to the output directory of abipkgdiff
             conf_dir (str): The absolute path to the conf directory
+            build_id (str): The build id
+            product_id (str): The product id
+            db_conn: The db connection
             cleanup (bool): An option to remove temporary files and directories after running
 
 
@@ -117,21 +127,28 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
         for arg in cmd_supporting_args:
             command_list.append(arg)
         with open("output_file", "w") as output_file:
+            start_time = time.time()
             abipkgdiff, abipkgdiff_exit_code = run.run_command(command_list, None, output_file)
+            exec_time = time.time()-start_time
+            with rpmfile.open(old_main_rpm) as rpm:
+                name = rpm.headers.get('name').decode('utf-8')
+                old_version = rpm.headers.get('version').decode('utf-8')
+                old_release = rpm.headers.get('release').decode('utf-8')
+            with rpmfile.open(new_main_rpm) as rpm:
+                new_version = rpm.headers.get('version').decode('utf-8')
+                new_release = rpm.headers.get('release').decode('utf-8')
+            old_VR = old_version + "-" + old_release
+            new_VR = new_version + "-" + new_release
+            out = ""
             if abipkgdiff_exit_code != 0:
-                with rpmfile.open(old_main_rpm) as rpm:
-                    name = rpm.headers.get('name').decode('utf-8')
-                    old_version = rpm.headers.get('version').decode('utf-8')
-                    old_release = rpm.headers.get('release').decode('utf-8')
-                with rpmfile.open(new_main_rpm) as rpm:
-                    new_version = rpm.headers.get('version').decode('utf-8')
-                    new_release = rpm.headers.get('release').decode('utf-8')
-                print("Incompatibility found between " + name + "-" + old_version + "-" + old_release
-                      + " and " + name + "-" + new_version + "-" + new_release)
-                fileName = name + "__" + old_version + "-" + old_release + "__" + new_version + "-" + new_release + ".abidiff"
-                os.rename("output_file", output_dir + fileName)
+                print("Incompatibility found between " + name + "-" + old_VR + " and " + name + "-" + new_VR)
                 status = "fail"
-                # insert into db
+                fileName = name + "__" + old_VR + "__" + new_VR + ".abidiff"
+                os.rename("output_file", output_dir + fileName)
+                with open(output_dir + fileName) as f:
+                    out = f.read()
+        insert_db(db_conn, build_id, product_id, name, old_VR, new_VR, exec_time, status, out)
+
     if cleanup is True:
         for value in old_data[key]:
             os.remove(source_dir + "old/" + value)
@@ -171,3 +188,14 @@ def sortRPMs(key, source_dir, new_data, old_data):
             rpms_with_so.append(source_dir + "old/" + value)
             rpms_with_so.append(source_dir + new_data[key][count])
     return rpms_with_so, cmd_supporting_args
+
+
+def insert_db(db_conn, build_id, product_id, name, old_VR, new_VR, exec_time, status, out):
+    try:
+        if db_conn.is_db_connected:
+            db_conn.insert_ba_transaction_details(build_id, product_id, name, old_VR, new_VR, exec_time, status, out)
+            util.debug("Inserted into database: {}".format(name))
+        else:
+            util.debug("Not connected")
+    except Exception:
+        pass
