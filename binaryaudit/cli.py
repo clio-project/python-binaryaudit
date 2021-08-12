@@ -35,6 +35,7 @@ arg_parser = argparse.ArgumentParser(prog="binaryaudit", description="Tools for 
                                      parents=[arg_parser_common])
 arg_parser.add_argument("--is-elf", action="store", metavar="/path/to/file",
                         help="Determine whether a file is an ELF artifact. Exit is zero if true.")
+arg_parser.add_argument("--no-suppressions", action="store_true", help="Disable any default suppressions")
 
 
 # Subcommands. If a subcommand has been called, read the name from args.cmd

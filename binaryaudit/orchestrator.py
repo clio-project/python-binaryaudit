@@ -40,7 +40,7 @@ class ba_orchestrator:
         else:
             self.logger.debug("Not connected")
 
-    def perform_binary_audit(self, buildurl, logurl, source_dir, output_dir) -> None:
+    def perform_binary_audit(self, buildurl, logurl, source_dir, output_dir, use_suppressions) -> None:
         '''
         inserts product and build id into db
         calls mariner model test and waits for test result
@@ -57,7 +57,7 @@ class ba_orchestrator:
             self.logger.debug("Not connected")
 
         # call mariner model
-        mariner_binary_audit(source_dir, output_dir, self.build_id, self.product_id, self.db_conn)
+        mariner_binary_audit(source_dir, output_dir, self.build_id, self.product_id, self.db_conn, use_suppressions)
         # wait for test result
         # model = run_command()
         # result = model.popen_output

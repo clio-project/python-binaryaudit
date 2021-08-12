@@ -18,6 +18,8 @@ args = cli.arg_parser.parse_args()
 
 util.set_verbosity(args.verbose)
 
+use_suppressions = not args.no_suppressions
+
 if None is args.cmd:
     if not None is args.is_elf:
         if abicheck.is_elf(args.is_elf):
@@ -92,7 +94,7 @@ elif "poky" == args.cmd:
 
     if args.compare_buildhistory:
         suppr = []
-        if args.global_suppression is not None:
+        if args.global_suppression is not None and use_suppressions:
             suppr.append(args.global_suppression)
         d1 = args.buildhistory_baseline
         d2 = args.buildhistory_current
@@ -170,7 +172,7 @@ elif "mariner" == args.cmd:
         args.db_config
     )
     mariner_binaryaudit.get_product_id()
-    mariner_binaryaudit.perform_binary_audit(args.buildurl, args.logurl, args.source_dir, args.output_dir)
+    mariner_binaryaudit.perform_binary_audit(args.buildurl, args.logurl, args.source_dir, args.output_dir, use_suppressions)
 
 else:
     # This should be caught by argparse anyway
