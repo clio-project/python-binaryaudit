@@ -6,7 +6,7 @@ import argparse
 arg_parser_common = argparse.ArgumentParser(add_help=False)
 arg_parser_common.add_argument('-v', '--verbose', action='store_true',
                                help="Verbose output.")
-
+arg_parser_common.add_argument("--no-suppressions", action="store_true", help="Disable any default suppressions")
 # Database, reusable
 arg_parser_db = argparse.ArgumentParser(add_help=False)
 arg_parser_db.add_argument("--db-config", action="store", default="db_config", metavar="/path/to/file",
@@ -35,7 +35,7 @@ arg_parser = argparse.ArgumentParser(prog="binaryaudit", description="Tools for 
                                      parents=[arg_parser_common])
 arg_parser.add_argument("--is-elf", action="store", metavar="/path/to/file",
                         help="Determine whether a file is an ELF artifact. Exit is zero if true.")
-arg_parser.add_argument("--no-suppressions", action="store_true", help="Disable any default suppressions")
+
 
 
 # Subcommands. If a subcommand has been called, read the name from args.cmd
