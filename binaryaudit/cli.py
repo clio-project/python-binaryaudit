@@ -37,7 +37,6 @@ arg_parser.add_argument("--is-elf", action="store", metavar="/path/to/file",
                         help="Determine whether a file is an ELF artifact. Exit is zero if true.")
 
 
-
 # Subcommands. If a subcommand has been called, read the name from args.cmd
 arg_parser_subs = arg_parser.add_subparsers(help="Subcommands", dest="cmd")
 

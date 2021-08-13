@@ -64,4 +64,3 @@ class ba_orchestrator:
              )
         else:
             self.logger.debug("Not connected")
-
