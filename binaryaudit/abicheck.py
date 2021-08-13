@@ -177,30 +177,6 @@ def diff_get_bits(c):
     return a
 
 
-def filter_rpm(filename, filter_list, rpm):
-    ''' Filters out packages with specified words in name and packages not conatining a .so file.
-
-        Paramters:
-            filename (str): The name of the RPM file
-            filter_list (array): The list of filter words
-            rpm: The current RPM
-    '''
-    if any(word in filename for word in filter_list):
-        util.note("Dropping " + filename + " because it contains a filter word")
-        return True
-    elif "-debuginfo-" not in filename and "-devel-" not in filename:
-        has_so = False
-        for member in rpm.getmembers():
-            member_name = str(member)
-            if ".so" in member_name:
-                has_so = True
-                break
-        if has_so is False:
-            util.note("Dropping " + filename + " RPM because it has no shared object file")
-            return True
-    return False
-
-
 def diff_get_bit(c):
     ''' Circle through the return value bits.
 
@@ -226,13 +202,43 @@ def diff_get_bit(c):
     raise ValueError("Value '{}' can't be interpreted as a libabigail return status.".format(c))
 
 
+def filter_rpm(filename, filter_list, rpm, drop_count):
+    ''' Filters out packages with specified words in name and packages not conatining a .so file.
+
+        Paramters:
+            filename (str): The name of the RPM file
+            filter_list (array): The list of filter words
+            rpm: The current RPM
+    '''
+    if any(word in filename for word in filter_list):
+        util.note("Dropping " + filename + " because it contains a filter word")
+        drop_count += 1
+        return True, drop_count
+    elif "-debuginfo-" not in filename and "-devel-" not in filename:
+        has_so = False
+        for member in rpm.getmembers():
+            member_name = str(member)
+            if ".so" in member_name:
+                has_so = True
+                break
+        if has_so is False:
+            util.note("Dropping " + filename + " RPM because it has no shared object file")
+            drop_count += 1
+            return True, drop_count
+    return False, drop_count
+
+
 def generate_package_json(source_dir, out_filename):
     ''' Gets input directory of RPMs, filters out unwanted packages, groups packages based on source RPM, and outputs to JSON file.
 
         Parameters:
             source_dir (str): The path to the input directory.
             out_filename (str): The name of the output JSON file
+
+        Returns:
+            remaining_files (int): The number of files left after filtering
     '''
+    drop_count = 0
     filter_patterns = conf.get_config("Mariner", "rpms_filter_patterns")
     filter_list = filter_patterns.split(',')
     rpm_dict = {}
@@ -242,7 +248,8 @@ def generate_package_json(source_dir, out_filename):
             if f.endswith(".rpm"):
                 with rpmfile.open(f) as rpm:
                     source = rpm.headers.get("sourcerpm")
-                    if filter_rpm(filename, filter_list, rpm) is True:
+                    ret_filter_rpm, drop_count = filter_rpm(filename, filter_list, rpm, drop_count)
+                    if ret_filter_rpm is True:
                         continue
                 rpm_dict.setdefault(source.decode('utf-8'), []).append(filename)
     for key, value in list(rpm_dict.items()):
@@ -253,6 +260,11 @@ def generate_package_json(source_dir, out_filename):
                 break
         if debug_devel_only is True:
             util.note("Dropping files with " + key + " source name because there are only debuginfo and/or devel files")
+            drop_count += len(rpm_dict[key])
             del rpm_dict[key]
+    total_files = len(os.listdir(source_dir))
+    util.note("Dropped " + str(drop_count) + " of " + str(total_files) + " files")
+    remaining_files = total_files - drop_count
     with open(out_filename, "w") as output_file:
         json.dump(rpm_dict, output_file, indent=2)
+    return remaining_files

@@ -6,11 +6,13 @@ import subprocess
 import time
 import urllib.request
 
+from binaryaudit import abicheck
 from binaryaudit import run
 from binaryaudit import util
 
 
-def process_downloads(source_dir, new_json_file, old_json_file, output_dir, build_id, product_id, db_conn, cleanup=True):
+def process_downloads(source_dir, new_json_file, old_json_file, output_dir,
+                      build_id, product_id, db_conn, remaining_files, cleanup=True):
     ''' Finds and downloads older versions of RPMs.
 
         Parameters:
@@ -21,12 +23,13 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir, buil
             build_id (str): The build id
             product_id (str): The product id
             db_conn: The db connection
-
+            remianing_files (int): The number of files left after filtering
         Returns:
             overall_status (str): Returns "fail" if an incompatibility is found in at least 1 RPM, otherwise returns "pass"
     '''
     try:
-        overall_status = "pass"
+        processed_files = 0
+        overall_status = "PASSED"
         conf_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../conf")
         if not os.path.exists(source_dir + "old"):
             os.mkdir(source_dir + "old")
@@ -34,20 +37,22 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir, buil
         with open(new_json_file, "r") as file:
             data = json.load(file)
         for key, values in data.items():
+            processed_files += len(data[key])
             for value in values:
                 with rpmfile.open(source_dir + value) as rpm:
                     name = rpm.headers.get("name")
                 old_rpm_name = download(key, source_dir, name, old_rpm_dict)
             if old_rpm_name == "":
+                util.note("Processed " + str(processed_files) + " of " + str(remaining_files) + " files")
                 continue
             with open(old_json_file, "w") as outputFile:
                 json.dump(old_rpm_dict, outputFile, indent=2)
             ret_status = generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
                                            conf_dir, build_id, product_id, db_conn, cleanup)
-            util.note("Status: " + ret_status)
-
-            if ret_status == "fail":
-                overall_status = "fail"
+            util.note("Status: " + str(ret_status))
+            if ret_status != 0:
+                overall_status = "FAILED"
+            util.note("Processed " + str(processed_files) + " of " + str(remaining_files) + " files")
     finally:
         if cleanup is True:
             try:
@@ -102,11 +107,10 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
 
 
         Returns:
-            status (str): Returns "fail" if an incompatibility found, otherwise returns "pass"
+            abipkgdiff_exit_code (int): Returns non-zero if an incompatibility found
     '''
     # new_... handles the newer set of packages
     # old_... handles the older set of packages
-    status = "pass"
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
     with open(new_json_file, "r") as new_file:
@@ -141,18 +145,17 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
             new_VR = new_version + "-" + new_release
             out = ""
             if abipkgdiff_exit_code != 0:
-                print("Incompatibility found between " + name + "-" + old_VR + " and " + name + "-" + new_VR)
-                status = "fail"
+                util.note("Incompatibility found between " + name + "-" + old_VR + " and " + name + "-" + new_VR)
                 fileName = name + "__" + old_VR + "__" + new_VR + ".abidiff"
                 os.rename("output_file", output_dir + fileName)
                 with open(output_dir + fileName) as f:
                     out = f.read()
+        status = abicheck.diff_get_bit(abipkgdiff_exit_code)
         insert_db(db_conn, build_id, product_id, name, old_VR, new_VR, exec_time, status, out)
-
     if cleanup is True:
         for value in old_data[key]:
             os.remove(source_dir + "old/" + value)
-    return status
+    return abipkgdiff_exit_code
 
 
 def sortRPMs(key, source_dir, new_data, old_data):
