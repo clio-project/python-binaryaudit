@@ -253,6 +253,16 @@ def generate_package_json(source_dir, out_filename):
                         continue
                 rpm_dict.setdefault(source.decode('utf-8'), []).append(filename)
     for key, value in list(rpm_dict.items()):
+        if "kernel" in key:
+            kernel_has_debuginfo = False
+            for values in value:
+                if "-debuginfo-" in values:
+                    kernel_has_debuginfo = True
+                    break
+            if kernel_has_debuginfo is False:
+                util.note("Dropping files with " + key + " source name because kernel packages must be accompanied by debuginfo package")
+                drop_count += len(rpm_dict[key])
+                del rpm_dict[key]
         debug_devel_only = True
         for values in value:
             if "-debuginfo-" not in values and "-devel-" not in values:
