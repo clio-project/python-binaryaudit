@@ -209,11 +209,17 @@ def filter_rpm(filename, filter_list, rpm, drop_count):
             filename (str): The name of the RPM file
             filter_list (array): The list of filter words
             rpm: The current RPM
+            drop_count (int): The number of files dropped
+
+        Returns:
+            filtered_out (bool): True if the RPM is filtered out, otherwise False
+            drop_count (int): The number of files dropped
     '''
+    filtered_out = False
     if any(word in filename for word in filter_list):
         util.note("Dropping " + filename + " because it contains a filter word")
         drop_count += 1
-        return True, drop_count
+        filtered_out = True
     elif "-debuginfo-" not in filename and "-devel-" not in filename:
         has_so = False
         for member in rpm.getmembers():
@@ -224,8 +230,44 @@ def filter_rpm(filename, filter_list, rpm, drop_count):
         if has_so is False:
             util.note("Dropping " + filename + " RPM because it has no shared object file")
             drop_count += 1
-            return True, drop_count
-    return False, drop_count
+            filtered_out = True
+    return filtered_out, drop_count
+
+
+def filter_dictionary(rpm_dict, drop_count):
+    ''' Filters out kernel packages without an accompanying debuginfo package
+        and groups of packages only conatining debuginfo and/or devel packages.
+
+        Parameters:
+            rpm_dict (dict): The dictionary containing the grouped RPMs
+            drop_count (int): The number of files dropped
+
+        Return:
+            drop_count (int): The number of files dropped
+    '''
+    for key, value in list(rpm_dict.items()):
+        if "kernel" in key:
+            kernel_has_debuginfo = False
+            for values in value:
+                if "-debuginfo-" in values:
+                    kernel_has_debuginfo = True
+                    break
+            if kernel_has_debuginfo is False:
+                util.note("Dropping files with " + key +
+                          " source name because kernel packages must be accompanied by debuginfo package")
+                drop_count += len(rpm_dict[key])
+                del rpm_dict[key]
+                continue
+        debug_devel_only = True
+        for values in value:
+            if "-debuginfo-" not in values and "-devel-" not in values:
+                debug_devel_only = False
+                break
+        if debug_devel_only is True:
+            util.note("Dropping files with " + key + " source name because there are only debuginfo and/or devel files")
+            drop_count += len(rpm_dict[key])
+            del rpm_dict[key]
+        return drop_count
 
 
 def generate_package_json(source_dir, out_filename):
@@ -242,6 +284,7 @@ def generate_package_json(source_dir, out_filename):
     filter_patterns = conf.get_config("Mariner", "rpms_filter_patterns")
     filter_list = filter_patterns.split(',')
     rpm_dict = {}
+    # Group input rpms into a json dictionary
     for filename in sorted(os.listdir(source_dir)):
         f = os.path.join(source_dir, filename)
         if os.path.isfile(f):
@@ -252,26 +295,7 @@ def generate_package_json(source_dir, out_filename):
                     if ret_filter_rpm is True:
                         continue
                 rpm_dict.setdefault(source.decode('utf-8'), []).append(filename)
-    for key, value in list(rpm_dict.items()):
-        if "kernel" in key:
-            kernel_has_debuginfo = False
-            for values in value:
-                if "-debuginfo-" in values:
-                    kernel_has_debuginfo = True
-                    break
-            if kernel_has_debuginfo is False:
-                util.note("Dropping files with " + key + " source name because kernel packages must be accompanied by debuginfo package")
-                drop_count += len(rpm_dict[key])
-                del rpm_dict[key]
-        debug_devel_only = True
-        for values in value:
-            if "-debuginfo-" not in values and "-devel-" not in values:
-                debug_devel_only = False
-                break
-        if debug_devel_only is True:
-            util.note("Dropping files with " + key + " source name because there are only debuginfo and/or devel files")
-            drop_count += len(rpm_dict[key])
-            del rpm_dict[key]
+    drop_count = filter_dictionary(rpm_dict, drop_count)
     total_files = len(os.listdir(source_dir))
     util.note("Dropped " + str(drop_count) + " of " + str(total_files) + " files")
     remaining_files = total_files - drop_count
