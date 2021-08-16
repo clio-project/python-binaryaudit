@@ -44,16 +44,16 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir,
                     name = rpm.headers.get("name")
                 old_rpm_name = download(key, source_dir, name, old_rpm_dict)
             if old_rpm_name == "":
-                util.note("Processed {} of {} files".format(str(processed_files), str(remaining_files)))
+                util.note("Processed {} of {} files".format(processed_files, remaining_files))
                 continue
             with open(old_json_file, "w") as outputFile:
                 json.dump(old_rpm_dict, outputFile, indent=2)
             ret_status = generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
                                            conf_dir, build_id, product_id, db_conn, cleanup)
-            util.note("Status: {}".format(str(ret_status)))
+            util.note("Status: {}".format(ret_status))
             if ret_status != 0:
                 overall_status = "FAILED"
-            util.note("Processed {} of {} files".format(str(processed_files), str(remaining_files)))
+            util.note("Processed {} of {} files".format(processed_files, remaining_files))
     finally:
         if cleanup is True:
             try:
@@ -133,7 +133,7 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
         with open("output_file", "w") as output_file:
             start_time = time.time()
             abipkgdiff, abipkgdiff_exit_code = run.run_command(command_list, None, output_file)
-            exec_time = (time.time()-start_time)*1000000
+            exec_time = time.time()-start_time
             with rpmfile.open(old_main_rpm) as rpm:
                 name = rpm.headers.get('name').decode('utf-8')
                 old_version = rpm.headers.get('version').decode('utf-8')
