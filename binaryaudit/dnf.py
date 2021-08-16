@@ -31,6 +31,7 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir,
         processed_files = 0
         overall_status = "PASSED"
         conf_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../conf")
+        # TODO: move old dir to tmpdir for mariner
         if not os.path.exists(source_dir + "old"):
             os.mkdir(source_dir + "old")
         old_rpm_dict = {}
@@ -43,16 +44,16 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir,
                     name = rpm.headers.get("name")
                 old_rpm_name = download(key, source_dir, name, old_rpm_dict)
             if old_rpm_name == "":
-                util.note("Processed " + str(processed_files) + " of " + str(remaining_files) + " files")
+                util.note("Processed {} of {} files".format(str(processed_files), str(remaining_files)))
                 continue
             with open(old_json_file, "w") as outputFile:
                 json.dump(old_rpm_dict, outputFile, indent=2)
             ret_status = generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
                                            conf_dir, build_id, product_id, db_conn, cleanup)
-            util.note("Status: " + str(ret_status))
+            util.note("Status: {}".format(str(ret_status)))
             if ret_status != 0:
                 overall_status = "FAILED"
-            util.note("Processed " + str(processed_files) + " of " + str(remaining_files) + " files")
+            util.note("Processed {} of {} files".format(str(processed_files), str(remaining_files)))
     finally:
         if cleanup is True:
             try:
@@ -105,7 +106,6 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
             db_conn: The db connection
             cleanup (bool): An option to remove temporary files and directories after running
 
-
         Returns:
             abipkgdiff_exit_code (int): Returns non-zero if an incompatibility found
     '''
@@ -133,7 +133,7 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
         with open("output_file", "w") as output_file:
             start_time = time.time()
             abipkgdiff, abipkgdiff_exit_code = run.run_command(command_list, None, output_file)
-            exec_time = time.time()-start_time
+            exec_time = (time.time()-start_time)*1000000
             with rpmfile.open(old_main_rpm) as rpm:
                 name = rpm.headers.get('name').decode('utf-8')
                 old_version = rpm.headers.get('version').decode('utf-8')
@@ -145,7 +145,7 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
             new_VR = new_version + "-" + new_release
             out = ""
             if abipkgdiff_exit_code != 0:
-                util.note("Incompatibility found between " + name + "-" + old_VR + " and " + name + "-" + new_VR)
+                util.note("Incompatibility found between {} - {} and {} - {}".format(name, old_VR, name, new_VR))
                 fileName = name + "__" + old_VR + "__" + new_VR + ".abidiff"
                 os.rename("output_file", output_dir + fileName)
                 with open(output_dir + fileName) as f:
@@ -194,6 +194,19 @@ def sortRPMs(key, source_dir, new_data, old_data):
 
 
 def insert_db(db_conn, build_id, product_id, name, old_VR, new_VR, exec_time, status, out):
+    ''' Inserts data into the database
+
+        Parameters:
+            db_conn: The db connection
+            build_id (str): The build id
+            product_id (str): The product id
+            name (str): The name of the RPM
+            old_VR (str): The version and release of the older RPM
+            new_VR (str): The version and release of the newer RPM
+            exec_time (int): The execution time of abipkgdiff in microseconds
+            status (str): The status output of abipkgdiff
+            out (str): The output of abipkgdiff
+    '''
     try:
         if db_conn.is_db_connected:
             db_conn.insert_ba_transaction_details(build_id, product_id, name, old_VR, new_VR, exec_time, status, out)

@@ -253,8 +253,8 @@ def filter_dictionary(rpm_dict, drop_count):
                     kernel_has_debuginfo = True
                     break
             if kernel_has_debuginfo is False:
-                util.note("Dropping files with " + key +
-                          " source name because kernel packages must be accompanied by debuginfo package")
+                util.note("Dropping files with {} source name because ".format(key)
+                          + "kernel packages must be accompanied by debuginfo package")
                 drop_count += len(rpm_dict[key])
                 del rpm_dict[key]
                 continue
@@ -264,10 +264,10 @@ def filter_dictionary(rpm_dict, drop_count):
                 debug_devel_only = False
                 break
         if debug_devel_only is True:
-            util.note("Dropping files with " + key + " source name because there are only debuginfo and/or devel files")
+            util.note("Dropping files with {} source name because there are only debuginfo and/or devel files".format(key))
             drop_count += len(rpm_dict[key])
             del rpm_dict[key]
-        return drop_count
+    return drop_count
 
 
 def generate_package_json(source_dir, out_filename):
@@ -297,7 +297,7 @@ def generate_package_json(source_dir, out_filename):
                 rpm_dict.setdefault(source.decode('utf-8'), []).append(filename)
     drop_count = filter_dictionary(rpm_dict, drop_count)
     total_files = len(os.listdir(source_dir))
-    util.note("Dropped " + str(drop_count) + " of " + str(total_files) + " files")
+    util.note("Dropped {} of {} files".format(str(drop_count), str(total_files)))
     remaining_files = total_files - drop_count
     with open(out_filename, "w") as output_file:
         json.dump(rpm_dict, output_file, indent=2)
