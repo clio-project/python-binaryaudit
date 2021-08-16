@@ -91,7 +91,7 @@ def download(key, source_dir, name, old_rpm_dict):
 
 
 def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
-                      conf_dir, build_id, product_id, db_conn, use_suppressions, cleanup=True):
+                      conf_dir, build_id, product_id, db_conn, default_suppressions, cleanup=True):
     ''' Runs abipkgdiff against the grouped packages.
 
         Parameters:
@@ -123,8 +123,8 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
     for rpm in rpms_with_so:
         if i % 2 == 0:
             command_list = ["abipkgdiff"]
-            if use_suppressions:
-                command_list += ["--suppressions", conf_dir + "/suppressions.conf"]
+            for suppr in default_suppressions:
+                command_list += ["--suppr", suppr]
             old_main_rpm = rpm
         i += 1
         command_list.append(rpm)

@@ -20,6 +20,10 @@ util.set_verbosity(args.verbose)
 
 use_suppressions = not args.no_suppressions
 
+default_suppressions = []
+if not args.no_default_suppressions:
+    default_suppressions = [os.path.join(os.path.dirname(os.path.abspath(__file__)), "../conf/suppressions.conf")]
+
 if None is args.cmd:
     if not None is args.is_elf:
         if abicheck.is_elf(args.is_elf):
@@ -94,8 +98,9 @@ elif "poky" == args.cmd:
 
     if args.compare_buildhistory:
         suppr = []
-        if args.global_suppression is not None and use_suppressions:
+        if args.global_suppression is not None:
             suppr.append(args.global_suppression)
+        suppr += default_suppressions
         d1 = args.buildhistory_baseline
         d2 = args.buildhistory_current
 
@@ -172,7 +177,7 @@ elif "mariner" == args.cmd:
         args.db_config
     )
     mariner_binaryaudit.get_product_id()
-    mariner_binaryaudit.perform_binary_audit(args.buildurl, args.logurl, args.source_dir, args.output_dir, use_suppressions)
+    mariner_binaryaudit.perform_binary_audit(args.buildurl, args.logurl, args.source_dir, args.output_dir, default_suppressions)
 
 else:
     # This should be caught by argparse anyway

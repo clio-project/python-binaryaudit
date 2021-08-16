@@ -44,7 +44,7 @@ class wrapper:
         '''
         session.close()
 
-    def _initialize_db_connection(self) -> None:
+    def _initialize_connection(self) -> None:
         '''
         '''
         connection_url = URL(
