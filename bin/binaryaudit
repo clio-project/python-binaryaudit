@@ -18,6 +18,14 @@ args = cli.arg_parser.parse_args()
 
 util.set_verbosity(args.verbose)
 
+all_suppressions = []
+if args.global_suppression is not None:
+    all_suppressions.append(args.global_suppression)
+
+if not args.no_default_suppressions:
+    all_suppressions.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../conf/suppressions.conf"))
+
+
 if None is args.cmd:
     if not None is args.is_elf:
         if abicheck.is_elf(args.is_elf):
@@ -91,9 +99,6 @@ elif "poky" == args.cmd:
             util.error(str(e))
 
     if args.compare_buildhistory:
-        suppr = []
-        if args.global_suppression is not None:
-            suppr.append(args.global_suppression)
         d1 = args.buildhistory_baseline
         d2 = args.buildhistory_current
 
@@ -129,7 +134,7 @@ elif "poky" == args.cmd:
         # Only iterate through packages for now.
         # Only iterate through d2 now. Reverse iteration might bake sense, too.
         for fn in glob.glob(d2 + "/packages/*/*/binaryaudit", recursive=False):
-            item_name, base_version, new_version, exec_time, result, res_details, ret_acc = poky.recipe_abicheck(fn, d1, d2, suppr)
+            item_name, base_version, new_version, exec_time, result, res_details, ret_acc = poky.recipe_abicheck(fn, d1, d2, all_suppressions)
 
             # Set the build accumulated value to the highest found score.
             if ret_acc > build_ret_acc:
@@ -170,7 +175,7 @@ elif "mariner" == args.cmd:
         args.db_config
     )
     mariner_binaryaudit.get_product_id()
-    mariner_binaryaudit.perform_binary_audit(args.buildurl, args.logurl, args.source_dir, args.output_dir)
+    mariner_binaryaudit.perform_binary_audit(args.buildurl, args.logurl, args.source_dir, args.output_dir, all_suppressions)
 
 else:
     # This should be caught by argparse anyway
