@@ -74,7 +74,7 @@ def compare(ref, cur, suppr=[]):
     for sup_fn in suppr:
         cmd += ["--suppr", sup_fn]
     cmd += [ref, cur]
-
+    util.note(str(cmd))
     sout = subprocess.PIPE
     serr = subprocess.STDOUT
     shell = False
