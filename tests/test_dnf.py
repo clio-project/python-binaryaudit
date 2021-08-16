@@ -21,8 +21,10 @@ class dnfTestSuite(unittest.TestCase):
     def test_generate_abidiffs_output(self):
         new_json_file = os.path.join(data_dir, 'new.json')
         old_json_file = os.path.join(data_dir, 'old.json')
+        suppressions = [conf_dir + "/suppressions.conf"]
         dnf.generate_abidiffs("Cython-0.29.13-6.cm1.src.rpm", data_dir + "/", new_json_file,
-                              old_json_file, data_dir + "/output_abidiffs/", conf_dir, "ABCD-1234", "1", None, False)
+                              old_json_file, data_dir + "/output_abidiffs/", conf_dir, "ABCD-1234", "1", None,
+                              suppressions, False)
         with open(os.path.join(data_dir, 'output_abidiffs/python3-Cython__0.28.5-8.cm1__0.29.13-6.cm1.abidiff')) as f:
             out = f.read()
         os.remove(os.path.join(data_dir, 'output_abidiffs/python3-Cython__0.28.5-8.cm1__0.29.13-6.cm1.abidiff'))

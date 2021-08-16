@@ -11,7 +11,7 @@ arg_parser_common.add_argument('-v', '--verbose', action='store_true',
 arg_parser_db = argparse.ArgumentParser(add_help=False)
 arg_parser_db.add_argument("--db-config", action="store", default="db_config", metavar="/path/to/file",
                            help="Path to the config file in the env format. If omited, default is 'db_config' in CWD.")
-#Suppressions, reusable
+# Suppressions, reusable
 arg_parser_supressions = argparse.ArgumentParser(add_help=False)
 arg_parser_supressions.add_argument("--no-default-suppressions", action="store_true", help="Disable any default suppressions")
 arg_parser_supressions.add_argument("--global-suppression", action="store", help="Path to suppression file")
@@ -66,7 +66,8 @@ arg_parser_db_cmd.add_argument('--check-connection', action='store_true', requir
 
 # binaryaudit mariner
 arg_parser_mariner = arg_parser_subs.add_parser("mariner", help="Mariner Abipkgdiff Wrapper.",
-                                                parents=[arg_parser_common, arg_parser_db, arg_parser_telemetry, arg_parser_supressions])
+                                                parents=[arg_parser_common, arg_parser_db, arg_parser_telemetry,
+                                                         arg_parser_supressions])
 
 required_args = arg_parser_mariner.add_argument_group('mandatory arguments')
 required_args.add_argument('-i', '--source-dir', action='store', required=True,
@@ -76,7 +77,8 @@ required_args.add_argument('-o', '--output-dir', action='store', required=True,
 
 # binaryaudit poky ...
 arg_parser_poky = arg_parser_subs.add_parser("poky", help="RPM tools frontend.",
-                                             parents=[arg_parser_common, arg_parser_db, arg_parser_telemetry, arg_parser_supressions])
+                                             parents=[arg_parser_common, arg_parser_db, arg_parser_telemetry,
+                                                      arg_parser_supressions])
 arg_parser_poky.add_argument("--compare-buildhistory", action="store_true", help="Run abicompat on two buildhistory dirs.")
 arg_parser_poky.add_argument('--insert-baseline', action='store', required=False,
                              help="Insert baseline data into DB.")
