@@ -12,7 +12,7 @@ from binaryaudit import util
 
 
 def process_downloads(source_dir, new_json_file, old_json_file, output_dir,
-                      build_id, product_id, db_conn, remaining_files, cleanup=True):
+                      build_id, product_id, db_conn, remaining_files, all_suppressions, cleanup=True):
     ''' Finds and downloads older versions of RPMs.
 
         Parameters:
@@ -91,7 +91,7 @@ def download(key, source_dir, name, old_rpm_dict):
 
 
 def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
-                      conf_dir, build_id, product_id, db_conn, cleanup=True):
+                      conf_dir, build_id, product_id, db_conn, all_suppressions, cleanup=True):
     ''' Runs abipkgdiff against the grouped packages.
 
         Parameters:
@@ -104,6 +104,7 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
             build_id (str): The build id
             product_id (str): The product id
             db_conn: The db connection
+            all_suppressions (list): a list of the filepaths to suppression files used
             cleanup (bool): An option to remove temporary files and directories after running
 
         Returns:
@@ -121,7 +122,9 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
     i = 0
     for rpm in rpms_with_so:
         if i % 2 == 0:
-            command_list = ["abipkgdiff", "--suppressions", conf_dir + "/suppressions.conf"]
+            command_list = ["abipkgdiff"]
+            for suppr in all_suppressions:
+                command_list += ["--suppr", suppr]
             old_main_rpm = rpm
         i += 1
         command_list.append(rpm)
