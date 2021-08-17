@@ -134,9 +134,10 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
         for arg in cmd_supporting_args:
             command_list.append(arg)
         with open("output_file", "w") as output_file:
-            start_time = time.time()
+            start_time = time.monotonic()
             abipkgdiff, abipkgdiff_exit_code = run.run_command(command_list, None, output_file)
-            exec_time = time.time()-start_time
+            end_time = time.monotonic()
+            exec_time = (end_time-start_time)*1000000
             with rpmfile.open(old_main_rpm) as rpm:
                 name = rpm.headers.get('name').decode('utf-8')
                 old_version = rpm.headers.get('version').decode('utf-8')
