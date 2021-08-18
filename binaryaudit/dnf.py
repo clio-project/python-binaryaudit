@@ -49,7 +49,7 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir,
             with open(old_json_file, "w") as outputFile:
                 json.dump(old_rpm_dict, outputFile, indent=2)
             ret_status = generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
-                                           conf_dir, build_id, product_id, db_conn, cleanup)
+                                           conf_dir, build_id, product_id, db_conn, all_suppressions, cleanup)
             util.note("Status: {}".format(ret_status))
             if ret_status != 0:
                 overall_status = "FAILED"
@@ -86,12 +86,10 @@ def download(key, source_dir, name, old_rpm_dict):
         docker_loc, docker_loc_exit_code = run.run_command_docker(["/usr/bin/dnf", "repoquery", "--quiet", "--location",
                                                                   "--latest-limit=1", name], None, subprocess.PIPE)
         url = docker_loc.stdout.read().decode('utf-8')
-        if url == "":
-            i += 1
-        else:
+        if url != "":
             break
     util.debug("url: {}".format(url))
-    if i == 3:
+    if i == 2:
         return ""
     j = 0
     for j in range(3):
@@ -99,8 +97,8 @@ def download(key, source_dir, name, old_rpm_dict):
             urllib.request.urlretrieve(url, source_dir + "old/" + old_rpm_name)
             break
         except Exception:
-            j += 1
-    if j == 3:
+            pass
+    if j == 2:
         return ""
     old_rpm_dict.setdefault(key, []).append(old_rpm_name)
     return old_rpm_name
