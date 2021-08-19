@@ -150,7 +150,7 @@ elif "poky" == args.cmd:
                 build_result = TRANSACTION_MAIN_RESULT_FAILED
             db_conn.update_ba_test_result(args.build_id, prod_id, build_result)
     elif args.insert_baseline:
-        if not 'n' == args.enable_telemetry:
+        if 'n' == args.enable_telemetry:
             # Another way would be to implicitly enable telemetry
             util.error("Telemetry is not anabled")
             sys.exit(1)
