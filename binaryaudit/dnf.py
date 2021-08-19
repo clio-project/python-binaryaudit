@@ -49,7 +49,7 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir,
             with open(old_json_file, "w") as outputFile:
                 json.dump(old_rpm_dict, outputFile, indent=2)
             ret_status = generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
-                                           conf_dir, build_id, product_id, db_conn, cleanup)
+                                           conf_dir, build_id, product_id, db_conn, all_suppressions, cleanup)
             util.note("Status: {}".format(ret_status))
             if ret_status != 0:
                 overall_status = "FAILED"
