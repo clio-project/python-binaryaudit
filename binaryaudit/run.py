@@ -33,7 +33,7 @@ def run_command_docker(cmd, input, output):
         exit_code: The exit code of cmd.
     '''
     docker_img = conf.get_config("Mariner", "docker_image")
-    docker_cmd_list = ["sudo", "docker", "run", "-t", "--rm"]
+    docker_cmd_list = ["sudo", "docker", "run", "--rm"]
     docker_cmd_list.append(docker_img)
     docker_cmd_list.extend(cmd)
     popen_output = subprocess.Popen(docker_cmd_list, stdin=input, stdout=output)

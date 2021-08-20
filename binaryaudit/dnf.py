@@ -80,10 +80,11 @@ def download(key, source_dir, name, old_rpm_dict):
     old_rpm_name = docker.stdout.read().decode('utf-8')
     if old_rpm_name == "":
         return old_rpm_name
-    old_rpm_name = old_rpm_name.replace("\r\n", "")
+    old_rpm_name = old_rpm_name.rstrip("\n")
     docker_loc, docker_loc_exit_code = run.run_command_docker(["/usr/bin/dnf", "repoquery", "--quiet",
                                                               "--location", "--latest-limit=1", name], None, subprocess.PIPE)
     url = docker_loc.stdout.read().decode('utf-8')
+    url = url.rstrip("\n")
     util.debug("url: {}".format(url))
     urllib.request.urlretrieve(url, source_dir + "old/" + old_rpm_name)
     old_rpm_dict.setdefault(key, []).append(old_rpm_name)
