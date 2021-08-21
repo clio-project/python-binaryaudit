@@ -102,6 +102,11 @@ elif "poky" == args.cmd:
         d1 = args.buildhistory_baseline
         d2 = args.buildhistory_current
 
+        out_dir = args.output_dir
+        # XXX err out if exists or remove existing?
+        if out_dir and not os.path.isdir(out_dir):
+            os.makedirs(out_dir)
+
         if not 'y' == args.enable_telemetry and not os.path.isdir(d1):
                 util.warn("Directory '{}' doesn't exist.".format(d1))
                 sys.exit(1)
@@ -144,6 +149,12 @@ elif "poky" == args.cmd:
 
             if 'y' == args.enable_telemetry:
                 db_conn.insert_ba_transaction_details(args.build_id, prod_id, item_name, base_version, new_version, exec_time, result, res_details)
+
+            if out_dir and abicheck.DIFF_OK != ret_acc:
+                fname = util.build_diff_filename(item_name, base_version, new_version)
+                out_fpath = os.path.join(out_dir, fname)
+                with open(out_fpath, "w") as f:
+                    f.write(res_details)
 
         if 'y' == args.enable_telemetry:
             if abicheck.DIFF_OK != build_ret_acc:
