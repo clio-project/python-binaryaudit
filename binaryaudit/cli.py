@@ -87,7 +87,7 @@ arg_parser_poky.add_argument("--buildhistory-current", action="store",
                              help="Current buildhistory directory to be compared against the baseline.")
 # XXX Duplicate from Mariner, see if it can be unified.
 arg_parser_poky.add_argument('-o', '--output-dir', action='store', required=False,
-                        help="Path to local dir with output of abipkgdiff.")
+                             help="Path to local dir with output of abipkgdiff.")
 
 
 # ##### functions #####
