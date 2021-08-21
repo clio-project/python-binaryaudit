@@ -23,8 +23,7 @@ if args.global_suppression is not None:
     all_suppressions.append(args.global_suppression)
 
 if not args.no_default_suppressions:
-    all_suppressions.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../conf/suppressions.conf"))
-
+    all_suppressions.append(os.path.join(conf.get_config_dir(), "suppressions.conf"))
 
 if None is args.cmd:
     if not None is args.is_elf:
