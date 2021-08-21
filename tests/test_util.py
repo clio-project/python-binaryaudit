@@ -30,10 +30,18 @@ class UtilTestSuite(unittest.TestCase):
 
         assert expected == result
 
-    def test_build_diff_filename(self):
+    def test_build_diff_filename_ok(self):
         name = "rpm-libs"
         ver_old = "4.14.2-10.cm1"
         ver_new = "4.14.2-13.cm1"
         exp = "rpm-libs__4.14.2-10.cm1__4.14.2-13.cm1.abidiff"
+        ret = util.build_diff_filename(name, ver_old, ver_new)
+        assert exp == ret
+
+    def test_build_diff_filename_rep(self):
+        name = "rpm-libs"
+        ver_old = "n/a"
+        ver_new = "4.14.2-13.cm1"
+        exp = "rpm-libs__na__4.14.2-13.cm1.abidiff"
         ret = util.build_diff_filename(name, ver_old, ver_new)
         assert exp == ret

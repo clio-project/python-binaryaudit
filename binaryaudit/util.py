@@ -127,5 +127,9 @@ def build_diff_filename(name, ver_old, ver_new):
         old(str): old version
         new(str): new version
     """
+    bad_ch = ["/"]
+    for c in bad_ch:
+        ver_old = ver_old.replace(c, "")
+        ver_new = ver_new.replace(c, "")
     fn = "{}__{}__{}.abidiff".format(name, ver_old, ver_new)
     return fn
