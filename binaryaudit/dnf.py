@@ -151,7 +151,7 @@ def generate_abidiffs(key, source_dir, new_json_file, old_json_file, output_dir,
             out = ""
             if abipkgdiff_exit_code != 0:
                 util.note("Incompatibility found between {} - {} and {} - {}".format(name, old_VR, name, new_VR))
-                fileName = name + "__" + old_VR + "__" + new_VR + ".abidiff"
+                fileName = util.build_diff_filename(name, old_VR, new_VR)
                 os.rename("output_file", output_dir + fileName)
                 with open(output_dir + fileName) as f:
                     out = f.read()

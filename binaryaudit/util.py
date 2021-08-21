@@ -118,3 +118,14 @@ def create_path_to_xml(sn, adir, fn):
         out_fn = os.path.join(adir, ".".join([os.path.basename(fn), "xml"]))
 
     return out_fn
+
+
+def build_diff_filename(name, ver_old, ver_new):
+    """ Returns filename for an abidiff content
+    Parameters:
+        name(str): package spec name
+        old(str): old version
+        new(str): new version
+    """
+    fn = "{}__{}__{}.abidiff".format(name, ver_old, ver_new)
+    return fn
