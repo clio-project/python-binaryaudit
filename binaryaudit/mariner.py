@@ -17,7 +17,7 @@ def binary_audit(source_dir, output_dir, build_id, product_id, db_conn, use_supp
         cleanup_temp(cleanup, source_dir, new_json_file, old_json_file)
     return result
 
-                        
+
 def cleanup_temp(cleanup, source_dir, new_json_file, old_json_file):
     if cleanup is True:
         try:

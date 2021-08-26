@@ -55,7 +55,8 @@ class ba_orchestrator:
              )
         else:
             self.logger.debug("Not connected")
-        result = mariner_binary_audit(source_dir, output_dir, self.build_id, self.product_id, self.db_conn, all_suppressions, cleanup)
+        result = mariner_binary_audit(source_dir, output_dir, self.build_id, self.product_id,
+                                      self.db_conn, all_suppressions, cleanup)
         if self.db_conn.is_db_connected:
             self.db_conn.update_ba_test_result(
                 self.build_id,
