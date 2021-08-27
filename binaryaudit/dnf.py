@@ -28,17 +28,17 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir,
     '''
     processed_files = 0
     overall_status = "PASSED"
-    conf_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../conf")
+    conf_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), os.path.abspath(os.path.join("..", "conf")))
     # TODO: move old dir to tmpdir for mariner
-    if not os.path.exists(source_dir + "old"):
-        os.mkdir(source_dir + "old")
+    if not os.path.exists(os.path.join(source_dir, "old")):
+        os.mkdir(os.path.join(source_dir, "old"))
     old_rpm_dict = {}
     with open(new_json_file, "r") as file:
         data = json.load(file)
     for key, values in data.items():
         processed_files += len(data[key])
         for value in values:
-            with rpmfile.open(source_dir + value) as rpm:
+            with rpmfile.open(os.path.join(source_dir, value)) as rpm:
                 name = rpm.headers.get("name")
             old_rpm_name = download(key, source_dir, name, old_rpm_dict)
         if old_rpm_name == "":
