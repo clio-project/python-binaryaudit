@@ -10,7 +10,7 @@ def parse_config():
     '''
     global config
     config = configparser.ConfigParser()
-    config.read(get_config_dir() + '/binaryaudit.conf')
+    config.read(os.path.join(get_config_dir(), 'binaryaudit.conf'))
 
 
 def get_config(section, key):
