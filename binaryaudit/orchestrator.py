@@ -2,7 +2,7 @@
 
 from binaryaudit.db import wrapper as db_wrapper
 from binaryaudit.mariner import binary_audit as mariner_binary_audit
-from binaryaudit.poky import poky_binary_audit
+from binaryaudit.poky import poky_binaryaudit
 
 
 class ba_orchestrator:
@@ -57,7 +57,8 @@ class ba_orchestrator:
                 )
             else:
                 self.logger.debug("Not connected")
-                result = mariner_binary_audit(source_dir, output_dir, self.build_id, self.product_id, self.db_conn, all_suppressions)
+                result = mariner_binary_audit(source_dir, output_dir, self.build_id, self.product_id,
+                                              self.db_conn, all_suppressions)
             if self.db_conn.is_db_connected:
                 self.db_conn.update_ba_test_result(
                     self.build_id,
@@ -67,4 +68,4 @@ class ba_orchestrator:
             else:
                 self.logger.debug("Not connected")
         else:
-            result = poky_binary_audit(all_suppressions)
+            result = poky_binaryaudit(all_suppressions)
