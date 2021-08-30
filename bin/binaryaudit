@@ -186,7 +186,7 @@ elif "mariner" == args.cmd:
         args.db_config
     )
     mariner_binaryaudit.get_product_id()
-    mariner_binaryaudit.perform_binary_audit(args.buildurl, args.logurl, args.source_dir, args.output_dir, all_suppressions)
+    mariner_binaryaudit.perform_binary_audit(args.buildurl, args.logurl, args.source_dir, args.output_dir, all_suppressions, args.cleanup)
 
 else:
     # This should be caught by argparse anyway
