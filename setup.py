@@ -2,7 +2,7 @@
 from setuptools import setup
 
 setup(name="binaryaudit",
-      version="0.0.3",
+      version="0.0.4",
       description="ELF binary audit",
       url="",
       author="Anatol Belski",
