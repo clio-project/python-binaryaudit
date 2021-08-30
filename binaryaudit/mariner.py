@@ -21,7 +21,7 @@ def binary_audit(source_dir, output_dir, build_id, product_id, db_conn, use_supp
 def cleanup_temp(cleanup, source_dir, new_json_file, old_json_file):
     if cleanup is True:
         try:
-            shutil.rmtree(source_dir + "old")
+            shutil.rmtree(os.path.join(source_dir, "old"))
             os.remove(new_json_file)
             os.remove(old_json_file)
             os.remove("output_file")

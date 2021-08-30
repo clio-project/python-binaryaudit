@@ -28,7 +28,7 @@ def process_downloads(source_dir, new_json_file, old_json_file, output_dir,
     '''
     processed_files = 0
     overall_status = "PASSED"
-    conf_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), os.path.abspath(os.path.join("..", "conf")))
+    conf_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "conf"))
     # TODO: move old dir to tmpdir for mariner
     if not os.path.exists(os.path.join(source_dir, "old")):
         os.mkdir(os.path.join(source_dir, "old"))
