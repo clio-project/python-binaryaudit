@@ -224,7 +224,7 @@ def filter_rpm(filename, filter_list, rpm, drop_count):
         has_so = False
         for member in rpm.getmembers():
             member_name = str(member)
-            if ".so" in member_name:
+            if ".so" in member_name and ".socket" not in member_name:
                 has_so = True
                 break
         if has_so is False:
