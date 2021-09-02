@@ -41,7 +41,6 @@ class ba_orchestrator:
         else:
             self.logger.debug("Not connected")
 
-
     def perform_binary_audit(self, buildurl, logurl, source_dir, output_dir, all_suppressions, cleanup, name) -> None:
         '''
         inserts product and build id into db
