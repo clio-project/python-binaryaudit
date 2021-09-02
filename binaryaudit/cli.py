@@ -74,6 +74,9 @@ required_args.add_argument('-i', '--source-dir', action='store', required=True,
                            help="Path to local dir with new rpms.")
 required_args.add_argument('-o', '--output-dir', action='store', required=True,
                            help="Path to local dir with output of abipkgdiff.")
+optional_args = arg_parser_mariner.add_argument_group('optional arguments')
+optional_args.add_argument('-c', '--cleanup', action="store", default=True, required=False,
+                           help="Cleanup temporary directory and files.")
 
 # binaryaudit poky ...
 arg_parser_poky = arg_parser_subs.add_parser("poky", help="RPM tools frontend.",

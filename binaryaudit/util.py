@@ -1,3 +1,4 @@
+import re
 import os
 import sys
 import logging
@@ -133,3 +134,10 @@ def build_diff_filename(name, ver_old, ver_new):
         ver_new = ver_new.replace(c, "")
     fn = "{}__{}__{}.abidiff".format(name, ver_old, ver_new)
     return fn
+
+
+def is_dso_filename(filename):
+    so_reg = re.compile(r".*\.so(\.\d+)*$")
+    if so_reg.match(filename):
+        return True
+    return False
