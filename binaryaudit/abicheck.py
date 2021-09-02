@@ -224,8 +224,9 @@ def filter_rpm(filename, filter_list, rpm, drop_count):
         has_so = False
         for member in rpm.getmembers():
             member_name = str(member)
-            if ".so" in member_name:
-                has_so = True
+            member_name = member_name[12:-2]
+            has_so = util.is_dso_filename(member_name)
+            if has_so is True:
                 break
         if has_so is False:
             util.note("Dropping " + filename + " RPM because it has no shared object file")

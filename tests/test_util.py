@@ -45,3 +45,11 @@ class UtilTestSuite(unittest.TestCase):
         exp = "rpm-libs__na__4.14.2-13.cm1.abidiff"
         ret = util.build_diff_filename(name, ver_old, ver_new)
         assert exp == ret
+
+    def test_is_dso_filename(self):
+        fn1 = "/usr/lib/libyajl.so.2.1.0"
+        fn2 = "/usr/lib/libyajl.so"
+        fn3 = "/usr/lib/libyajl.socket"
+        self.assertTrue(util.is_dso_filename(fn1))
+        self.assertTrue(util.is_dso_filename(fn2))
+        self.assertFalse(util.is_dso_filename(fn3))
