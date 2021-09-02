@@ -88,7 +88,7 @@ elif "poky" == args.cmd:
         args.db_config
     )
     poky_binaryaudit.get_product_id()
-    poky_binaryaudit.perform_binary_audit(args.buildurl, args.logurl, args.source_dir, args.output_dir, all_suppressions, "poky")
+    poky_binaryaudit.perform_binary_audit(None, None, None, None, all_suppressions, "poky")
 
 elif "mariner" == args.cmd:
     mariner_binaryaudit = orchestrator(
