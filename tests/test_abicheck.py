@@ -44,9 +44,13 @@ class AbicheckTestSuite(unittest.TestCase):
         ref = os.path.join(data_dir, "libtest1-v0.so")
         cur = os.path.join(data_dir, "libtest1-v1.so")
         code, out, cmd = abicheck.compare(ref, cur)
-        expected_out = open(os.path.join(data_dir, 'test_compare_no_suppress_expected')).read()
         assert code == 4
-        assert out == expected_out
+        assert "function void foo(opaque_type*)" in out
+        assert "type size changed from 64 to 96" in out
+        assert "'int opaque_type::member0' offset changed from 0 to 32" in out
+        assert "'char opaque_type::member1' offset changed from 32 to 64" in out
+        assert "function void foo(another_type*)" in out
+        assert "type size changed from 64 to 96" in out
 
     def test_compare_with_suppress(self):
         ref = os.path.join(data_dir, "libtest1-v0.so")
@@ -55,9 +59,8 @@ class AbicheckTestSuite(unittest.TestCase):
         sup_2 = os.path.join(data_dir, "test1-1.suppr")
         suppr = [sup_1, sup_2]
         code, out, cmd = abicheck.compare(ref, cur, suppr)
-        expected_out = open(os.path.join(data_dir, 'test_compare_with_suppress_expected')).read()
         assert code == 0
-        assert out == expected_out
+        assert "Functions changes summary: 0 Removed, 0 Changed (2 filtered out), 0 Added function" in out
 
     def test_generate_json_packages(self):
         source_dir = os.path.join(data_dir, "generate_package_json_test")
