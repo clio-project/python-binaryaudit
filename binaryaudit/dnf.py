@@ -82,7 +82,7 @@ def download(key, source_dir, name, old_rpm_dict):
         return ""
     for j in range(3):
         try:
-            urllib.request.urlretrieve(url, source_dir + "old/" + old_rpm_name)
+            urllib.request.urlretrieve(url, os.path.join(source_dir, "old", old_rpm_name))
             break
         except Exception:
             pass
@@ -182,17 +182,17 @@ def sortRPMs(key, source_dir, new_data, old_data):
         count += 1
         if "-debuginfo-" in value:
             cmd_supporting_args.append("--d1")
-            cmd_supporting_args.append(source_dir + "old/" + value)
+            cmd_supporting_args.append(os.path.join(source_dir, "old", value))
             cmd_supporting_args.append("--d2")
-            cmd_supporting_args.append(source_dir + new_data[key][count])
+            cmd_supporting_args.append(os.path.join(source_dir, new_data[key][count]))
         elif "-devel-" in value:
             cmd_supporting_args.append("--devel1")
-            cmd_supporting_args.append(source_dir + "old/" + value)
+            cmd_supporting_args.append(os.path.join(source_dir, "old", value))
             cmd_supporting_args.append("--devel2")
-            cmd_supporting_args.append(source_dir + new_data[key][count])
+            cmd_supporting_args.append(os.path.join(source_dir, new_data[key][count]))
         else:
-            rpms_with_so.append(source_dir + "old/" + value)
-            rpms_with_so.append(source_dir + new_data[key][count])
+            rpms_with_so.append(os.path.join(source_dir, "old", value))
+            rpms_with_so.append(os.path.join(source_dir, new_data[key][count]))
     return rpms_with_so, cmd_supporting_args
 
 
