@@ -32,7 +32,7 @@ class dnfTestSuite(unittest.TestCase):
                                        "1",
                                        None,
                                        suppressions)
-        assert 0 == status
+        assert 0 != status
         with open(os.path.join(data_dir, "output_abidiffs", "python3-Cython__0.28.5-8.cm1__0.29.13-6.cm1.abidiff")) as f:
             out = f.read()
         os.remove(os.path.join(data_dir, "output_abidiffs", "python3-Cython__0.28.5-8.cm1__0.29.13-6.cm1.abidiff"))
